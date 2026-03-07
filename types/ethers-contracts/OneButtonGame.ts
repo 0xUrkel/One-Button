@@ -6,9 +6,9 @@ import type { TypedContractEvent, TypedDeferredTopicFilter, TypedEventLog, Typed
   
 
   export interface OneButtonGameInterface extends Interface {
-    getFunction(nameOrSignature: "BASE_COST" | "BPS_DENOMINATOR" | "COST_MULTIPLIER_BPS" | "DIVIDEND_BPS" | "FULL_RESET_DURATION" | "LATE_PHASE_EXTENSION" | "LATE_PHASE_THRESHOLD" | "SAME_WALLET_COOLDOWN" | "SEASON_DURATION" | "SUDDEN_DEATH_EXTENSION" | "SUDDEN_DEATH_THRESHOLD" | "TREASURY_BPS" | "WINNER_BPS" | "claimDividend" | "currentRoundId" | "currentSeasonId" | "dividendClaimed" | "getCurrentPressCost" | "getPressCost" | "getTimeRemaining" | "owner" | "pause" | "paused" | "playerContribution" | "playerLastPressAt" | "playerPressCount" | "press" | "renounceOwnership" | "roundHasParticipated" | "rounds" | "seasons" | "setTreasury" | "settleRound" | "transferOwnership" | "treasury" | "unpause"): FunctionFragment;
+    getFunction(nameOrSignature: "BASE_COST" | "BPS_DENOMINATOR" | "COST_MULTIPLIER_BPS" | "DIVIDEND_BPS" | "FULL_RESET_DURATION" | "LATE_PHASE_EXTENSION" | "LATE_PHASE_THRESHOLD" | "SAME_WALLET_COOLDOWN" | "SEASON_DURATION" | "SUDDEN_DEATH_EXTENSION" | "SUDDEN_DEATH_THRESHOLD" | "TREASURY_BPS" | "WINNER_BPS" | "claimDividend" | "currentRoundId" | "currentSeasonId" | "dividendClaimed" | "getCurrentPhase" | "getCurrentPressCost" | "getPressCost" | "getTimeRemaining" | "owner" | "pause" | "paused" | "playerContribution" | "playerLastPressAt" | "playerPressCount" | "press" | "renounceOwnership" | "rollRoundIfExpiredWithoutPresses" | "roundHasParticipated" | "rounds" | "seasons" | "setTreasury" | "settleRound" | "transferOwnership" | "treasury" | "unpause"): FunctionFragment;
 
-    getEvent(nameOrSignatureOrTopic: "ButtonPressed" | "DividendClaimed" | "OwnershipTransferred" | "Paused" | "RoundSettled" | "RoundStarted" | "SeasonFinalized" | "SeasonStarted" | "TreasuryUpdated" | "Unpaused"): EventFragment;
+    getEvent(nameOrSignatureOrTopic: "ButtonPressed" | "DividendClaimed" | "OwnershipTransferred" | "Paused" | "RoundRolledWithoutPresses" | "RoundSettled" | "RoundStarted" | "SeasonFinalized" | "SeasonStarted" | "TreasuryUpdated" | "Unpaused"): EventFragment;
 
     encodeFunctionData(functionFragment: 'BASE_COST', values?: undefined): string;
 encodeFunctionData(functionFragment: 'BPS_DENOMINATOR', values?: undefined): string;
@@ -27,6 +27,7 @@ encodeFunctionData(functionFragment: 'claimDividend', values: [BigNumberish]): s
 encodeFunctionData(functionFragment: 'currentRoundId', values?: undefined): string;
 encodeFunctionData(functionFragment: 'currentSeasonId', values?: undefined): string;
 encodeFunctionData(functionFragment: 'dividendClaimed', values: [BigNumberish, AddressLike]): string;
+encodeFunctionData(functionFragment: 'getCurrentPhase', values?: undefined): string;
 encodeFunctionData(functionFragment: 'getCurrentPressCost', values: [AddressLike]): string;
 encodeFunctionData(functionFragment: 'getPressCost', values: [BigNumberish, AddressLike]): string;
 encodeFunctionData(functionFragment: 'getTimeRemaining', values?: undefined): string;
@@ -38,6 +39,7 @@ encodeFunctionData(functionFragment: 'playerLastPressAt', values: [BigNumberish,
 encodeFunctionData(functionFragment: 'playerPressCount', values: [BigNumberish, AddressLike]): string;
 encodeFunctionData(functionFragment: 'press', values?: undefined): string;
 encodeFunctionData(functionFragment: 'renounceOwnership', values?: undefined): string;
+encodeFunctionData(functionFragment: 'rollRoundIfExpiredWithoutPresses', values?: undefined): string;
 encodeFunctionData(functionFragment: 'roundHasParticipated', values: [BigNumberish, AddressLike]): string;
 encodeFunctionData(functionFragment: 'rounds', values: [BigNumberish]): string;
 encodeFunctionData(functionFragment: 'seasons', values: [BigNumberish]): string;
@@ -64,6 +66,7 @@ decodeFunctionResult(functionFragment: 'claimDividend', data: BytesLike): Result
 decodeFunctionResult(functionFragment: 'currentRoundId', data: BytesLike): Result;
 decodeFunctionResult(functionFragment: 'currentSeasonId', data: BytesLike): Result;
 decodeFunctionResult(functionFragment: 'dividendClaimed', data: BytesLike): Result;
+decodeFunctionResult(functionFragment: 'getCurrentPhase', data: BytesLike): Result;
 decodeFunctionResult(functionFragment: 'getCurrentPressCost', data: BytesLike): Result;
 decodeFunctionResult(functionFragment: 'getPressCost', data: BytesLike): Result;
 decodeFunctionResult(functionFragment: 'getTimeRemaining', data: BytesLike): Result;
@@ -75,6 +78,7 @@ decodeFunctionResult(functionFragment: 'playerLastPressAt', data: BytesLike): Re
 decodeFunctionResult(functionFragment: 'playerPressCount', data: BytesLike): Result;
 decodeFunctionResult(functionFragment: 'press', data: BytesLike): Result;
 decodeFunctionResult(functionFragment: 'renounceOwnership', data: BytesLike): Result;
+decodeFunctionResult(functionFragment: 'rollRoundIfExpiredWithoutPresses', data: BytesLike): Result;
 decodeFunctionResult(functionFragment: 'roundHasParticipated', data: BytesLike): Result;
 decodeFunctionResult(functionFragment: 'rounds', data: BytesLike): Result;
 decodeFunctionResult(functionFragment: 'seasons', data: BytesLike): Result;
@@ -126,6 +130,18 @@ decodeFunctionResult(functionFragment: 'unpause', data: BytesLike): Result;
       export type InputTuple = [account: AddressLike];
       export type OutputTuple = [account: string];
       export interface OutputObject {account: string };
+      export type Event = TypedContractEvent<InputTuple, OutputTuple, OutputObject>
+      export type Filter = TypedDeferredTopicFilter<Event>
+      export type Log = TypedEventLog<Event>
+      export type LogDescription = TypedLogDescription<Event>
+    }
+
+  
+
+    export namespace RoundRolledWithoutPressesEvent {
+      export type InputTuple = [expiredRoundId: BigNumberish, newRoundId: BigNumberish, seasonId: BigNumberish];
+      export type OutputTuple = [expiredRoundId: bigint, newRoundId: bigint, seasonId: bigint];
+      export interface OutputObject {expiredRoundId: bigint, newRoundId: bigint, seasonId: bigint };
       export type Event = TypedContractEvent<InputTuple, OutputTuple, OutputObject>
       export type Filter = TypedDeferredTopicFilter<Event>
       export type Log = TypedEventLog<Event>
@@ -376,6 +392,14 @@ decodeFunctionResult(functionFragment: 'unpause', data: BytesLike): Result;
     
 
     
+    getCurrentPhase: TypedContractMethod<
+      [],
+      [string],
+      'view'
+    >
+    
+
+    
     getCurrentPressCost: TypedContractMethod<
       [player: AddressLike, ],
       [bigint],
@@ -457,6 +481,14 @@ decodeFunctionResult(functionFragment: 'unpause', data: BytesLike): Result;
 
     
     renounceOwnership: TypedContractMethod<
+      [],
+      [void],
+      'nonpayable'
+    >
+    
+
+    
+    rollRoundIfExpiredWithoutPresses: TypedContractMethod<
       [],
       [void],
       'nonpayable'
@@ -615,6 +647,11 @@ getFunction(nameOrSignature: 'dividendClaimed'): TypedContractMethod<
       [boolean],
       'view'
     >;
+getFunction(nameOrSignature: 'getCurrentPhase'): TypedContractMethod<
+      [],
+      [string],
+      'view'
+    >;
 getFunction(nameOrSignature: 'getCurrentPressCost'): TypedContractMethod<
       [player: AddressLike, ],
       [bigint],
@@ -670,6 +707,11 @@ getFunction(nameOrSignature: 'renounceOwnership'): TypedContractMethod<
       [void],
       'nonpayable'
     >;
+getFunction(nameOrSignature: 'rollRoundIfExpiredWithoutPresses'): TypedContractMethod<
+      [],
+      [void],
+      'nonpayable'
+    >;
 getFunction(nameOrSignature: 'roundHasParticipated'): TypedContractMethod<
       [arg0: BigNumberish, arg1: AddressLike, ],
       [boolean],
@@ -715,6 +757,7 @@ getFunction(nameOrSignature: 'unpause'): TypedContractMethod<
 getEvent(key: 'DividendClaimed'): TypedContractEvent<DividendClaimedEvent.InputTuple, DividendClaimedEvent.OutputTuple, DividendClaimedEvent.OutputObject>;
 getEvent(key: 'OwnershipTransferred'): TypedContractEvent<OwnershipTransferredEvent.InputTuple, OwnershipTransferredEvent.OutputTuple, OwnershipTransferredEvent.OutputObject>;
 getEvent(key: 'Paused'): TypedContractEvent<PausedEvent.InputTuple, PausedEvent.OutputTuple, PausedEvent.OutputObject>;
+getEvent(key: 'RoundRolledWithoutPresses'): TypedContractEvent<RoundRolledWithoutPressesEvent.InputTuple, RoundRolledWithoutPressesEvent.OutputTuple, RoundRolledWithoutPressesEvent.OutputObject>;
 getEvent(key: 'RoundSettled'): TypedContractEvent<RoundSettledEvent.InputTuple, RoundSettledEvent.OutputTuple, RoundSettledEvent.OutputObject>;
 getEvent(key: 'RoundStarted'): TypedContractEvent<RoundStartedEvent.InputTuple, RoundStartedEvent.OutputTuple, RoundStartedEvent.OutputObject>;
 getEvent(key: 'SeasonFinalized'): TypedContractEvent<SeasonFinalizedEvent.InputTuple, SeasonFinalizedEvent.OutputTuple, SeasonFinalizedEvent.OutputObject>;
@@ -738,6 +781,10 @@ getEvent(key: 'Unpaused'): TypedContractEvent<UnpausedEvent.InputTuple, Unpaused
 
       'Paused(address)': TypedContractEvent<PausedEvent.InputTuple, PausedEvent.OutputTuple, PausedEvent.OutputObject>;
       Paused: TypedContractEvent<PausedEvent.InputTuple, PausedEvent.OutputTuple, PausedEvent.OutputObject>;
+    
+
+      'RoundRolledWithoutPresses(uint256,uint256,uint256)': TypedContractEvent<RoundRolledWithoutPressesEvent.InputTuple, RoundRolledWithoutPressesEvent.OutputTuple, RoundRolledWithoutPressesEvent.OutputObject>;
+      RoundRolledWithoutPresses: TypedContractEvent<RoundRolledWithoutPressesEvent.InputTuple, RoundRolledWithoutPressesEvent.OutputTuple, RoundRolledWithoutPressesEvent.OutputObject>;
     
 
       'RoundSettled(uint256,uint256,address,uint256,uint256,uint256,uint256,uint64)': TypedContractEvent<RoundSettledEvent.InputTuple, RoundSettledEvent.OutputTuple, RoundSettledEvent.OutputObject>;
