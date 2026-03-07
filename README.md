@@ -1,60 +1,232 @@
-# One Button (Hardhat)
+# One Button Game
 
-Starter Hardhat project for the AVAX game.
+A decentralized, on-chain social experiment built on **Avalanche**.
 
-## Install
+Inspired by Reddit's famous **"The Button"**, this smart contract game
+turns a simple mechanic into an economic game of timing, strategy, and
+risk.
 
-```bash
+Every press increases the pot. Every press resets the clock. When the
+timer hits zero, **the last player to press wins**.
+
+---
+
+# Game Mechanics
+
+## Timer
+
+Each round begins with a **12 hour timer**.
+
+## Pressing the Button
+
+Players can press the button by sending AVAX. Each player's press cost
+**increases exponentially**.
+
+Initial press cost:
+
+0.1 AVAX
+
+Each additional press by the same wallet:
+
+cost = previous_cost \* 1.35
+
+Example:
+
+Press Cost
+
+---
+
+1 0.10 AVAX
+2 0.135 AVAX
+3 0.18225 AVAX
+4 0.246 AVAX
+
+---
+
+# Timer Extensions
+
+## Normal Mode
+
+Remaining time \> 1 hour
+
+Press effect: Timer resets to 12 hours
+
+## Late Mode
+
+Remaining time \< 1 hour
+
+Press effect: +10 minutes
+
+## Sudden Death
+
+Remaining time \< 10 minutes
+
+Press effect: +30 seconds
+
+This creates intense end-game battles.
+
+---
+
+# Cooldown Protection
+
+same wallet cooldown = 10 seconds
+
+---
+
+# Pot Distribution
+
+When the timer reaches zero:
+
+Winner: 80% Dividend Pool: 10% Treasury: 10%
+
+---
+
+# Dividend System
+
+Players who pressed the button share **10% of the pot**.
+
+Dividend payout is proportional to how much AVAX they contributed.
+
+Example:
+
+Player A contributed 2 AVAX\
+Total pot contributions = 10 AVAX
+
+Player A receives:
+
+(2 / 10) \* dividend_pool
+
+Dividends are claimed via:
+
+claimDividend(roundId)
+
+---
+
+# Rounds and Seasons
+
+## Rounds
+
+A round ends when the timer reaches zero.
+
+Immediately after settlement: a new round begins
+
+## Seasons
+
+Seasons last:
+
+14 days
+
+Season statistics track: - total rounds - total presses - total pot
+volume - unique players
+
+When a season ends: a new season automatically starts
+
+---
+
+# Dead Round Recovery
+
+If nobody presses during a round and 12 hours pass:
+
+rollRoundIfExpiredWithoutPresses()
+
+This rolls the game forward safely.
+
+---
+
+# Smart Contract Architecture
+
+Key structures: - Round - Season - Player press counts - Player
+contributions - Dividend claims
+
+Security primitives from **OpenZeppelin**.
+
+---
+
+# Contract Functions
+
+## Game Actions
+
+press()\
+settleRound()\
+claimDividend(roundId)\
+rollRoundIfExpiredWithoutPresses()
+
+## Read Functions
+
+getCurrentPressCost(address)\
+getTimeRemaining()\
+getCurrentPhase()
+
+---
+
+# Tech Stack
+
+- Solidity 0.8.24
+- Hardhat
+- Avalanche C-Chain
+- OpenZeppelin Contracts
+- TypeScript tests
+- Mocha / Chai
+
+---
+
+# Running the Project
+
+Install dependencies:
+
 npm install
-cp .env.example .env
-```
 
-## Compile
+Compile:
 
-```bash
 npm run compile
-```
 
-## Test
+Run tests:
 
-```bash
 npm test
-```
 
-## Run local chain
+---
 
-```bash
-npm run node
-```
+# Project Structure
 
-## Deploy locally
+contracts/ OneButtonGame.sol
 
-In a second terminal:
+test/ OneButtonGame.ts
 
-```bash
-npm run deploy:local
-```
+scripts/
 
-## Deploy to Avalanche Fuji
+ignition/ modules/
 
-Set these in `.env`:
+hardhat.config.ts package.json
 
-- `FUJI_RPC_URL`
-- `PRIVATE_KEY`
-- `TREASURY_ADDRESS`
+---
 
-Then run:
+# Deployment
 
-```bash
-npm run deploy:fuji
-```
+Example deployment:
 
-## Current contract features
+npx hardhat ignition deploy ignition/modules/OneButtonGame.ts --network
+fuji
 
-- 12 hour round timer
-- per-player escalating press cost
-- normal / late / sudden death timer logic
-- 80 / 10 / 10 split for winner / dividends / treasury
-- claimable dividends
-- automatic next-round creation
-- 14 day seasons
+---
+
+# Future Features
+
+- On‑chain leaderboard
+- Wallet → Twitter identity linking
+- Web frontend (Next.js + wagmi)
+- Real‑time activity feed
+- Season champion rewards
+- Analytics dashboard
+
+---
+
+# License
+
+MIT
+
+---
+
+# Inspiration
+
+Inspired by Reddit's **The Button**, reimagined as a fully on‑chain game
+economy.
