@@ -1,0 +1,20 @@
+{
+  "name": "one-button-hardhat",
+  "private": true,
+  "version": "0.1.0",
+  "type": "module",
+  "scripts": {
+    "compile": "hardhat compile",
+    "test": "hardhat test",
+    "node": "hardhat node",
+    "deploy:local": "hardhat ignition deploy ./ignition/modules/OneButtonGame.ts --network localhost",
+    "deploy:fuji": "hardhat ignition deploy ./ignition/modules/OneButtonGame.ts --network fuji"
+  },
+  "devDependencies": {
+    "@nomicfoundation/hardhat-toolbox-mocha-ethers": "^3.0.0",
+    "@openzeppelin/contracts": "^5.0.0",
+    "dotenv": "^16.4.0",
+    "hardhat": "^3.0.0",
+    "typescript": "^5.5.0"
+  }
+}

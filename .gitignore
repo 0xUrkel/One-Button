@@ -1,0 +1,90 @@
+# -----------------------------
+# Node / NPM
+# -----------------------------
+node_modules/
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+pnpm-debug.log*
+package-lock.json
+yarn.lock
+pnpm-lock.yaml
+
+# -----------------------------
+# Environment variables / secrets
+# -----------------------------
+.env
+.env.*
+!.env.example
+
+# -----------------------------
+# Hardhat build artifacts
+# -----------------------------
+artifacts/
+cache/
+typechain/
+typechain-types/
+
+# Hardhat ignition deployments
+ignition/deployments/
+
+# -----------------------------
+# Solidity coverage / reports
+# -----------------------------
+coverage/
+coverage.json
+.solcover.js
+
+# -----------------------------
+# Test output
+# -----------------------------
+test-results/
+gas-report.txt
+
+# -----------------------------
+# Local blockchain data
+# -----------------------------
+chain-data/
+hardhat-network/
+
+# -----------------------------
+# Frontend (if added later)
+# -----------------------------
+.next/
+dist/
+build/
+out/
+.vercel/
+
+# -----------------------------
+# Logs
+# -----------------------------
+logs/
+*.log
+
+# -----------------------------
+# OS files
+# -----------------------------
+.DS_Store
+Thumbs.db
+desktop.ini
+
+# -----------------------------
+# IDE / Editor
+# -----------------------------
+.vscode/
+.idea/
+*.swp
+*.swo
+
+# -----------------------------
+# Temporary files
+# -----------------------------
+*.tmp
+*.temp
+*.bak
+
+# -----------------------------
+# Misc
+# -----------------------------
+*.tsbuildinfo
