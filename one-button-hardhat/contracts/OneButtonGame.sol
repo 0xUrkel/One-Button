@@ -10,11 +10,12 @@ contract OneButtonGame is Ownable, ReentrancyGuard, Pausable {
     uint256 public constant COST_MULTIPLIER_BPS = 13500; // 1.35x
     uint256 public constant BPS_DENOMINATOR = 10000;
 
-    uint256 public constant FULL_RESET_DURATION = 12 hours;
-    uint256 public constant LATE_PHASE_THRESHOLD = 1 hours;
-    uint256 public constant SUDDEN_DEATH_THRESHOLD = 10 minutes;
-    uint256 public constant LATE_PHASE_EXTENSION = 10 minutes;
-    uint256 public constant SUDDEN_DEATH_EXTENSION = 30 seconds;
+    // Launch-friendly timing defaults
+    uint256 public fullResetDuration = 3 minutes;
+    uint256 public latePhaseThreshold = 60 seconds;
+    uint256 public suddenDeathThreshold = 15 seconds;
+    uint256 public latePhaseExtension = 30 seconds;
+    uint256 public suddenDeathExtension = 10 seconds;
 
     uint256 public constant WINNER_BPS = 8000;
     uint256 public constant DIVIDEND_BPS = 1000;
@@ -122,6 +123,14 @@ contract OneButtonGame is Ownable, ReentrancyGuard, Pausable {
         uint256 indexed seasonId
     );
 
+    event TimingConfigUpdated(
+        uint256 fullResetDuration,
+        uint256 latePhaseThreshold,
+        uint256 suddenDeathThreshold,
+        uint256 latePhaseExtension,
+        uint256 suddenDeathExtension
+    );
+
     constructor(address initialTreasury) Ownable(msg.sender) {
         require(initialTreasury != address(0), "invalid treasury");
         treasury = initialTreasury;
@@ -131,55 +140,18 @@ contract OneButtonGame is Ownable, ReentrancyGuard, Pausable {
     }
 
     function press() external payable nonReentrant whenNotPaused {
-        Round storage round = rounds[currentRoundId];
+        Round storage currentRound = rounds[currentRoundId];
 
-        require(!round.settled, "round settled");
-        require(block.timestamp < round.endTime, "round expired");
-        require(
-            playerLastPressAt[currentRoundId][msg.sender] == 0 ||
-                block.timestamp >=
-                playerLastPressAt[currentRoundId][msg.sender] + SAME_WALLET_COOLDOWN,
-            "cooldown active"
-        );
-
-        uint256 requiredCost = getPressCost(currentRoundId, msg.sender);
-        require(msg.value == requiredCost, "incorrect payment");
-
-        uint64 previousEndTime = round.endTime;
-        uint256 remaining = previousEndTime > block.timestamp ? previousEndTime - block.timestamp : 0;
-
-        if (!roundHasParticipated[currentRoundId][msg.sender]) {
-            roundHasParticipated[currentRoundId][msg.sender] = true;
-            round.uniquePlayers += 1;
+        // If the round is expired, automatically move the game forward first.
+        if (block.timestamp >= currentRound.endTime && !currentRound.settled) {
+            if (currentRound.lastPresser != address(0)) {
+                _settleCurrentRound();
+            } else {
+                _rollExpiredRoundWithoutPresses();
+            }
         }
 
-        playerPressCount[currentRoundId][msg.sender] += 1;
-        playerContribution[currentRoundId][msg.sender] += msg.value;
-        playerLastPressAt[currentRoundId][msg.sender] = uint64(block.timestamp);
-
-        round.totalPresses += 1;
-        round.totalPot += msg.value;
-        round.lastPresser = msg.sender;
-
-        if (remaining > LATE_PHASE_THRESHOLD) {
-            round.endTime = uint64(block.timestamp + FULL_RESET_DURATION);
-        } else if (remaining > SUDDEN_DEATH_THRESHOLD) {
-            round.endTime = uint64(previousEndTime + LATE_PHASE_EXTENSION);
-        } else {
-            round.endTime = uint64(previousEndTime + SUDDEN_DEATH_EXTENSION);
-        }
-
-        emit ButtonPressed(
-            currentRoundId,
-            currentSeasonId,
-            msg.sender,
-            playerPressCount[currentRoundId][msg.sender],
-            msg.value,
-            round.totalPot,
-            previousEndTime,
-            round.endTime,
-            msg.sender
-        );
+        _executePress(msg.sender, msg.value);
     }
 
     function settleRound() external nonReentrant whenNotPaused {
@@ -189,47 +161,7 @@ contract OneButtonGame is Ownable, ReentrancyGuard, Pausable {
         require(round.lastPresser != address(0), "no presses yet");
         require(block.timestamp >= round.endTime, "round not ended");
 
-        uint256 winnerPayout = (round.totalPot * WINNER_BPS) / BPS_DENOMINATOR;
-        uint256 dividendPool = (round.totalPot * DIVIDEND_BPS) / BPS_DENOMINATOR;
-        uint256 treasuryAmount = round.totalPot - winnerPayout - dividendPool;
-
-        round.winnerPayout = winnerPayout;
-        round.dividendPool = dividendPool;
-        round.treasuryAmount = treasuryAmount;
-        round.settled = true;
-
-        Season storage season = seasons[currentSeasonId];
-        season.totalRounds += 1;
-        season.totalPot += round.totalPot;
-        season.totalWinnerPayouts += winnerPayout;
-        season.totalDividendPools += dividendPool;
-        season.totalTreasuryAmount += treasuryAmount;
-        season.totalPresses += round.totalPresses;
-        season.totalUniquePlayers += round.uniquePlayers;
-
-        (bool treasuryOk, ) = payable(treasury).call{value: treasuryAmount}("");
-        require(treasuryOk, "treasury transfer failed");
-
-        (bool winnerOk, ) = payable(round.lastPresser).call{value: winnerPayout}("");
-        require(winnerOk, "winner transfer failed");
-
-        emit RoundSettled(
-            currentRoundId,
-            currentSeasonId,
-            round.lastPresser,
-            round.totalPot,
-            winnerPayout,
-            dividendPool,
-            treasuryAmount,
-            uint64(block.timestamp)
-        );
-
-        if (block.timestamp >= seasons[currentSeasonId].endTime) {
-            _finalizeSeason(currentSeasonId);
-            _startSeason();
-        }
-
-        _startRound();
+        _settleCurrentRound();
     }
 
     function claimDividend(uint256 roundId) external nonReentrant whenNotPaused {
@@ -240,6 +172,7 @@ contract OneButtonGame is Ownable, ReentrancyGuard, Pausable {
 
         uint256 contributed = playerContribution[roundId][msg.sender];
         require(contributed > 0, "no contribution");
+        require(round.totalPot > 0, "empty round");
 
         uint256 amount = (round.dividendPool * contributed) / round.totalPot;
         require(amount > 0, "nothing claimable");
@@ -252,26 +185,14 @@ contract OneButtonGame is Ownable, ReentrancyGuard, Pausable {
         emit DividendClaimed(roundId, msg.sender, amount);
     }
 
-    function rollRoundIfExpiredWithoutPresses() external whenNotPaused {
+    function rollRoundIfExpiredWithoutPresses() external nonReentrant whenNotPaused {
         Round storage round = rounds[currentRoundId];
 
         require(!round.settled, "round settled");
         require(round.lastPresser == address(0), "round has presses");
         require(block.timestamp >= round.endTime, "round not expired");
 
-        uint256 expiredRoundId = currentRoundId;
-        uint256 seasonId = currentSeasonId;
-
-        round.settled = true;
-
-        if (block.timestamp >= seasons[currentSeasonId].endTime) {
-            _finalizeSeason(currentSeasonId);
-            _startSeason();
-        }
-
-        _startRound();
-
-        emit RoundRolledWithoutPresses(expiredRoundId, currentRoundId, seasonId);
+        _rollExpiredRoundWithoutPresses();
     }
 
     function getPressCost(uint256 roundId, address player) public view returns (uint256 cost) {
@@ -299,13 +220,43 @@ contract OneButtonGame is Ownable, ReentrancyGuard, Pausable {
 
         uint256 remaining = round.endTime - block.timestamp;
 
-        if (remaining > LATE_PHASE_THRESHOLD) {
+        if (remaining > latePhaseThreshold) {
             return "normal";
-        } else if (remaining > SUDDEN_DEATH_THRESHOLD) {
+        } else if (remaining > suddenDeathThreshold) {
             return "late";
         } else {
             return "sudden_death";
         }
+    }
+
+    function setTimingConfig(
+        uint256 newFullResetDuration,
+        uint256 newLatePhaseThreshold,
+        uint256 newSuddenDeathThreshold,
+        uint256 newLatePhaseExtension,
+        uint256 newSuddenDeathExtension
+    ) external onlyOwner {
+        require(newFullResetDuration >= 30 seconds, "reset too short");
+        require(newFullResetDuration <= 12 hours, "reset too long");
+        require(newLatePhaseThreshold > newSuddenDeathThreshold, "bad thresholds");
+        require(newLatePhaseThreshold < newFullResetDuration, "late >= reset");
+        require(newSuddenDeathThreshold > 0, "bad sudden death");
+        require(newLatePhaseExtension > 0, "bad late extension");
+        require(newSuddenDeathExtension > 0, "bad sudden extension");
+
+        fullResetDuration = newFullResetDuration;
+        latePhaseThreshold = newLatePhaseThreshold;
+        suddenDeathThreshold = newSuddenDeathThreshold;
+        latePhaseExtension = newLatePhaseExtension;
+        suddenDeathExtension = newSuddenDeathExtension;
+
+        emit TimingConfigUpdated(
+            fullResetDuration,
+            latePhaseThreshold,
+            suddenDeathThreshold,
+            latePhaseExtension,
+            suddenDeathExtension
+        );
     }
 
     function setTreasury(address newTreasury) external onlyOwner {
@@ -321,6 +272,137 @@ contract OneButtonGame is Ownable, ReentrancyGuard, Pausable {
 
     function unpause() external onlyOwner {
         _unpause();
+    }
+
+    function _executePress(address player, uint256 amount) internal {
+        Round storage round = rounds[currentRoundId];
+
+        require(!round.settled, "round settled");
+        require(block.timestamp < round.endTime, "round expired");
+        require(
+            playerLastPressAt[currentRoundId][player] == 0 ||
+                block.timestamp >=
+                playerLastPressAt[currentRoundId][player] + SAME_WALLET_COOLDOWN,
+            "cooldown active"
+        );
+
+        uint256 requiredCost = getPressCost(currentRoundId, player);
+        require(amount == requiredCost, "incorrect payment");
+
+        uint64 previousEndTime = round.endTime;
+        uint256 remaining = previousEndTime > block.timestamp
+            ? previousEndTime - block.timestamp
+            : 0;
+
+        if (!roundHasParticipated[currentRoundId][player]) {
+            roundHasParticipated[currentRoundId][player] = true;
+            round.uniquePlayers += 1;
+        }
+
+        playerPressCount[currentRoundId][player] += 1;
+        playerContribution[currentRoundId][player] += amount;
+        playerLastPressAt[currentRoundId][player] = uint64(block.timestamp);
+
+        round.totalPresses += 1;
+        round.totalPot += amount;
+        round.lastPresser = player;
+
+        if (remaining > latePhaseThreshold) {
+            round.endTime = uint64(block.timestamp + fullResetDuration);
+        } else if (remaining > suddenDeathThreshold) {
+            round.endTime = uint64(previousEndTime + latePhaseExtension);
+        } else {
+            round.endTime = uint64(previousEndTime + suddenDeathExtension);
+        }
+
+        emit ButtonPressed(
+            currentRoundId,
+            currentSeasonId,
+            player,
+            playerPressCount[currentRoundId][player],
+            amount,
+            round.totalPot,
+            previousEndTime,
+            round.endTime,
+            player
+        );
+    }
+
+    function _settleCurrentRound() internal {
+        Round storage round = rounds[currentRoundId];
+
+        require(!round.settled, "already settled");
+        require(round.lastPresser != address(0), "no presses yet");
+        require(block.timestamp >= round.endTime, "round not ended");
+
+        uint256 settledRoundId = currentRoundId;
+        uint256 settledSeasonId = currentSeasonId;
+        address winner = round.lastPresser;
+        uint256 totalPot = round.totalPot;
+
+        uint256 winnerPayout = (totalPot * WINNER_BPS) / BPS_DENOMINATOR;
+        uint256 dividendPool = (totalPot * DIVIDEND_BPS) / BPS_DENOMINATOR;
+        uint256 treasuryAmount = totalPot - winnerPayout - dividendPool;
+
+        round.winnerPayout = winnerPayout;
+        round.dividendPool = dividendPool;
+        round.treasuryAmount = treasuryAmount;
+        round.settled = true;
+
+        Season storage season = seasons[currentSeasonId];
+        season.totalRounds += 1;
+        season.totalPot += totalPot;
+        season.totalWinnerPayouts += winnerPayout;
+        season.totalDividendPools += dividendPool;
+        season.totalTreasuryAmount += treasuryAmount;
+        season.totalPresses += round.totalPresses;
+        season.totalUniquePlayers += round.uniquePlayers;
+
+        (bool treasuryOk, ) = payable(treasury).call{value: treasuryAmount}("");
+        require(treasuryOk, "treasury transfer failed");
+
+        (bool winnerOk, ) = payable(winner).call{value: winnerPayout}("");
+        require(winnerOk, "winner transfer failed");
+
+        emit RoundSettled(
+            settledRoundId,
+            settledSeasonId,
+            winner,
+            totalPot,
+            winnerPayout,
+            dividendPool,
+            treasuryAmount,
+            uint64(block.timestamp)
+        );
+
+        if (block.timestamp >= seasons[currentSeasonId].endTime) {
+            _finalizeSeason(currentSeasonId);
+            _startSeason();
+        }
+
+        _startRound();
+    }
+
+    function _rollExpiredRoundWithoutPresses() internal {
+        Round storage round = rounds[currentRoundId];
+
+        require(!round.settled, "round settled");
+        require(round.lastPresser == address(0), "round has presses");
+        require(block.timestamp >= round.endTime, "round not expired");
+
+        uint256 expiredRoundId = currentRoundId;
+        uint256 seasonId = currentSeasonId;
+
+        round.settled = true;
+
+        if (block.timestamp >= seasons[currentSeasonId].endTime) {
+            _finalizeSeason(currentSeasonId);
+            _startSeason();
+        }
+
+        _startRound();
+
+        emit RoundRolledWithoutPresses(expiredRoundId, currentRoundId, seasonId);
     }
 
     function _startSeason() internal {
@@ -366,7 +448,7 @@ contract OneButtonGame is Ownable, ReentrancyGuard, Pausable {
             id: currentRoundId,
             seasonId: currentSeasonId,
             startTime: uint64(block.timestamp),
-            endTime: uint64(block.timestamp + FULL_RESET_DURATION),
+            endTime: uint64(block.timestamp + fullResetDuration),
             totalPot: 0,
             winnerPayout: 0,
             dividendPool: 0,

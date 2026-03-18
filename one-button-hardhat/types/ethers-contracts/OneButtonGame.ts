@@ -6,31 +6,29 @@ import type { TypedContractEvent, TypedDeferredTopicFilter, TypedEventLog, Typed
   
 
   export interface OneButtonGameInterface extends Interface {
-    getFunction(nameOrSignature: "BASE_COST" | "BPS_DENOMINATOR" | "COST_MULTIPLIER_BPS" | "DIVIDEND_BPS" | "FULL_RESET_DURATION" | "LATE_PHASE_EXTENSION" | "LATE_PHASE_THRESHOLD" | "SAME_WALLET_COOLDOWN" | "SEASON_DURATION" | "SUDDEN_DEATH_EXTENSION" | "SUDDEN_DEATH_THRESHOLD" | "TREASURY_BPS" | "WINNER_BPS" | "claimDividend" | "currentRoundId" | "currentSeasonId" | "dividendClaimed" | "getCurrentPhase" | "getCurrentPressCost" | "getPressCost" | "getTimeRemaining" | "owner" | "pause" | "paused" | "playerContribution" | "playerLastPressAt" | "playerPressCount" | "press" | "renounceOwnership" | "rollRoundIfExpiredWithoutPresses" | "roundHasParticipated" | "rounds" | "seasons" | "setTreasury" | "settleRound" | "transferOwnership" | "treasury" | "unpause"): FunctionFragment;
+    getFunction(nameOrSignature: "BASE_COST" | "BPS_DENOMINATOR" | "COST_MULTIPLIER_BPS" | "DIVIDEND_BPS" | "SAME_WALLET_COOLDOWN" | "SEASON_DURATION" | "TREASURY_BPS" | "WINNER_BPS" | "claimDividend" | "currentRoundId" | "currentSeasonId" | "dividendClaimed" | "fullResetDuration" | "getCurrentPhase" | "getCurrentPressCost" | "getPressCost" | "getTimeRemaining" | "latePhaseExtension" | "latePhaseThreshold" | "owner" | "pause" | "paused" | "playerContribution" | "playerLastPressAt" | "playerPressCount" | "press" | "renounceOwnership" | "rollRoundIfExpiredWithoutPresses" | "roundHasParticipated" | "rounds" | "seasons" | "setTimingConfig" | "setTreasury" | "settleRound" | "suddenDeathExtension" | "suddenDeathThreshold" | "transferOwnership" | "treasury" | "unpause"): FunctionFragment;
 
-    getEvent(nameOrSignatureOrTopic: "ButtonPressed" | "DividendClaimed" | "OwnershipTransferred" | "Paused" | "RoundRolledWithoutPresses" | "RoundSettled" | "RoundStarted" | "SeasonFinalized" | "SeasonStarted" | "TreasuryUpdated" | "Unpaused"): EventFragment;
+    getEvent(nameOrSignatureOrTopic: "ButtonPressed" | "DividendClaimed" | "OwnershipTransferred" | "Paused" | "RoundRolledWithoutPresses" | "RoundSettled" | "RoundStarted" | "SeasonFinalized" | "SeasonStarted" | "TimingConfigUpdated" | "TreasuryUpdated" | "Unpaused"): EventFragment;
 
     encodeFunctionData(functionFragment: 'BASE_COST', values?: undefined): string;
 encodeFunctionData(functionFragment: 'BPS_DENOMINATOR', values?: undefined): string;
 encodeFunctionData(functionFragment: 'COST_MULTIPLIER_BPS', values?: undefined): string;
 encodeFunctionData(functionFragment: 'DIVIDEND_BPS', values?: undefined): string;
-encodeFunctionData(functionFragment: 'FULL_RESET_DURATION', values?: undefined): string;
-encodeFunctionData(functionFragment: 'LATE_PHASE_EXTENSION', values?: undefined): string;
-encodeFunctionData(functionFragment: 'LATE_PHASE_THRESHOLD', values?: undefined): string;
 encodeFunctionData(functionFragment: 'SAME_WALLET_COOLDOWN', values?: undefined): string;
 encodeFunctionData(functionFragment: 'SEASON_DURATION', values?: undefined): string;
-encodeFunctionData(functionFragment: 'SUDDEN_DEATH_EXTENSION', values?: undefined): string;
-encodeFunctionData(functionFragment: 'SUDDEN_DEATH_THRESHOLD', values?: undefined): string;
 encodeFunctionData(functionFragment: 'TREASURY_BPS', values?: undefined): string;
 encodeFunctionData(functionFragment: 'WINNER_BPS', values?: undefined): string;
 encodeFunctionData(functionFragment: 'claimDividend', values: [BigNumberish]): string;
 encodeFunctionData(functionFragment: 'currentRoundId', values?: undefined): string;
 encodeFunctionData(functionFragment: 'currentSeasonId', values?: undefined): string;
 encodeFunctionData(functionFragment: 'dividendClaimed', values: [BigNumberish, AddressLike]): string;
+encodeFunctionData(functionFragment: 'fullResetDuration', values?: undefined): string;
 encodeFunctionData(functionFragment: 'getCurrentPhase', values?: undefined): string;
 encodeFunctionData(functionFragment: 'getCurrentPressCost', values: [AddressLike]): string;
 encodeFunctionData(functionFragment: 'getPressCost', values: [BigNumberish, AddressLike]): string;
 encodeFunctionData(functionFragment: 'getTimeRemaining', values?: undefined): string;
+encodeFunctionData(functionFragment: 'latePhaseExtension', values?: undefined): string;
+encodeFunctionData(functionFragment: 'latePhaseThreshold', values?: undefined): string;
 encodeFunctionData(functionFragment: 'owner', values?: undefined): string;
 encodeFunctionData(functionFragment: 'pause', values?: undefined): string;
 encodeFunctionData(functionFragment: 'paused', values?: undefined): string;
@@ -43,8 +41,11 @@ encodeFunctionData(functionFragment: 'rollRoundIfExpiredWithoutPresses', values?
 encodeFunctionData(functionFragment: 'roundHasParticipated', values: [BigNumberish, AddressLike]): string;
 encodeFunctionData(functionFragment: 'rounds', values: [BigNumberish]): string;
 encodeFunctionData(functionFragment: 'seasons', values: [BigNumberish]): string;
+encodeFunctionData(functionFragment: 'setTimingConfig', values: [BigNumberish, BigNumberish, BigNumberish, BigNumberish, BigNumberish]): string;
 encodeFunctionData(functionFragment: 'setTreasury', values: [AddressLike]): string;
 encodeFunctionData(functionFragment: 'settleRound', values?: undefined): string;
+encodeFunctionData(functionFragment: 'suddenDeathExtension', values?: undefined): string;
+encodeFunctionData(functionFragment: 'suddenDeathThreshold', values?: undefined): string;
 encodeFunctionData(functionFragment: 'transferOwnership', values: [AddressLike]): string;
 encodeFunctionData(functionFragment: 'treasury', values?: undefined): string;
 encodeFunctionData(functionFragment: 'unpause', values?: undefined): string;
@@ -53,23 +54,21 @@ encodeFunctionData(functionFragment: 'unpause', values?: undefined): string;
 decodeFunctionResult(functionFragment: 'BPS_DENOMINATOR', data: BytesLike): Result;
 decodeFunctionResult(functionFragment: 'COST_MULTIPLIER_BPS', data: BytesLike): Result;
 decodeFunctionResult(functionFragment: 'DIVIDEND_BPS', data: BytesLike): Result;
-decodeFunctionResult(functionFragment: 'FULL_RESET_DURATION', data: BytesLike): Result;
-decodeFunctionResult(functionFragment: 'LATE_PHASE_EXTENSION', data: BytesLike): Result;
-decodeFunctionResult(functionFragment: 'LATE_PHASE_THRESHOLD', data: BytesLike): Result;
 decodeFunctionResult(functionFragment: 'SAME_WALLET_COOLDOWN', data: BytesLike): Result;
 decodeFunctionResult(functionFragment: 'SEASON_DURATION', data: BytesLike): Result;
-decodeFunctionResult(functionFragment: 'SUDDEN_DEATH_EXTENSION', data: BytesLike): Result;
-decodeFunctionResult(functionFragment: 'SUDDEN_DEATH_THRESHOLD', data: BytesLike): Result;
 decodeFunctionResult(functionFragment: 'TREASURY_BPS', data: BytesLike): Result;
 decodeFunctionResult(functionFragment: 'WINNER_BPS', data: BytesLike): Result;
 decodeFunctionResult(functionFragment: 'claimDividend', data: BytesLike): Result;
 decodeFunctionResult(functionFragment: 'currentRoundId', data: BytesLike): Result;
 decodeFunctionResult(functionFragment: 'currentSeasonId', data: BytesLike): Result;
 decodeFunctionResult(functionFragment: 'dividendClaimed', data: BytesLike): Result;
+decodeFunctionResult(functionFragment: 'fullResetDuration', data: BytesLike): Result;
 decodeFunctionResult(functionFragment: 'getCurrentPhase', data: BytesLike): Result;
 decodeFunctionResult(functionFragment: 'getCurrentPressCost', data: BytesLike): Result;
 decodeFunctionResult(functionFragment: 'getPressCost', data: BytesLike): Result;
 decodeFunctionResult(functionFragment: 'getTimeRemaining', data: BytesLike): Result;
+decodeFunctionResult(functionFragment: 'latePhaseExtension', data: BytesLike): Result;
+decodeFunctionResult(functionFragment: 'latePhaseThreshold', data: BytesLike): Result;
 decodeFunctionResult(functionFragment: 'owner', data: BytesLike): Result;
 decodeFunctionResult(functionFragment: 'pause', data: BytesLike): Result;
 decodeFunctionResult(functionFragment: 'paused', data: BytesLike): Result;
@@ -82,8 +81,11 @@ decodeFunctionResult(functionFragment: 'rollRoundIfExpiredWithoutPresses', data:
 decodeFunctionResult(functionFragment: 'roundHasParticipated', data: BytesLike): Result;
 decodeFunctionResult(functionFragment: 'rounds', data: BytesLike): Result;
 decodeFunctionResult(functionFragment: 'seasons', data: BytesLike): Result;
+decodeFunctionResult(functionFragment: 'setTimingConfig', data: BytesLike): Result;
 decodeFunctionResult(functionFragment: 'setTreasury', data: BytesLike): Result;
 decodeFunctionResult(functionFragment: 'settleRound', data: BytesLike): Result;
+decodeFunctionResult(functionFragment: 'suddenDeathExtension', data: BytesLike): Result;
+decodeFunctionResult(functionFragment: 'suddenDeathThreshold', data: BytesLike): Result;
 decodeFunctionResult(functionFragment: 'transferOwnership', data: BytesLike): Result;
 decodeFunctionResult(functionFragment: 'treasury', data: BytesLike): Result;
 decodeFunctionResult(functionFragment: 'unpause', data: BytesLike): Result;
@@ -198,6 +200,18 @@ decodeFunctionResult(functionFragment: 'unpause', data: BytesLike): Result;
 
   
 
+    export namespace TimingConfigUpdatedEvent {
+      export type InputTuple = [fullResetDuration: BigNumberish, latePhaseThreshold: BigNumberish, suddenDeathThreshold: BigNumberish, latePhaseExtension: BigNumberish, suddenDeathExtension: BigNumberish];
+      export type OutputTuple = [fullResetDuration: bigint, latePhaseThreshold: bigint, suddenDeathThreshold: bigint, latePhaseExtension: bigint, suddenDeathExtension: bigint];
+      export interface OutputObject {fullResetDuration: bigint, latePhaseThreshold: bigint, suddenDeathThreshold: bigint, latePhaseExtension: bigint, suddenDeathExtension: bigint };
+      export type Event = TypedContractEvent<InputTuple, OutputTuple, OutputObject>
+      export type Filter = TypedDeferredTopicFilter<Event>
+      export type Log = TypedEventLog<Event>
+      export type LogDescription = TypedLogDescription<Event>
+    }
+
+  
+
     export namespace TreasuryUpdatedEvent {
       export type InputTuple = [oldTreasury: AddressLike, newTreasury: AddressLike];
       export type OutputTuple = [oldTreasury: string, newTreasury: string];
@@ -288,30 +302,6 @@ decodeFunctionResult(functionFragment: 'unpause', data: BytesLike): Result;
     
 
     
-    FULL_RESET_DURATION: TypedContractMethod<
-      [],
-      [bigint],
-      'view'
-    >
-    
-
-    
-    LATE_PHASE_EXTENSION: TypedContractMethod<
-      [],
-      [bigint],
-      'view'
-    >
-    
-
-    
-    LATE_PHASE_THRESHOLD: TypedContractMethod<
-      [],
-      [bigint],
-      'view'
-    >
-    
-
-    
     SAME_WALLET_COOLDOWN: TypedContractMethod<
       [],
       [bigint],
@@ -321,22 +311,6 @@ decodeFunctionResult(functionFragment: 'unpause', data: BytesLike): Result;
 
     
     SEASON_DURATION: TypedContractMethod<
-      [],
-      [bigint],
-      'view'
-    >
-    
-
-    
-    SUDDEN_DEATH_EXTENSION: TypedContractMethod<
-      [],
-      [bigint],
-      'view'
-    >
-    
-
-    
-    SUDDEN_DEATH_THRESHOLD: TypedContractMethod<
       [],
       [bigint],
       'view'
@@ -392,6 +366,14 @@ decodeFunctionResult(functionFragment: 'unpause', data: BytesLike): Result;
     
 
     
+    fullResetDuration: TypedContractMethod<
+      [],
+      [bigint],
+      'view'
+    >
+    
+
+    
     getCurrentPhase: TypedContractMethod<
       [],
       [string],
@@ -417,6 +399,22 @@ decodeFunctionResult(functionFragment: 'unpause', data: BytesLike): Result;
 
     
     getTimeRemaining: TypedContractMethod<
+      [],
+      [bigint],
+      'view'
+    >
+    
+
+    
+    latePhaseExtension: TypedContractMethod<
+      [],
+      [bigint],
+      'view'
+    >
+    
+
+    
+    latePhaseThreshold: TypedContractMethod<
       [],
       [bigint],
       'view'
@@ -520,6 +518,14 @@ decodeFunctionResult(functionFragment: 'unpause', data: BytesLike): Result;
     
 
     
+    setTimingConfig: TypedContractMethod<
+      [newFullResetDuration: BigNumberish, newLatePhaseThreshold: BigNumberish, newSuddenDeathThreshold: BigNumberish, newLatePhaseExtension: BigNumberish, newSuddenDeathExtension: BigNumberish, ],
+      [void],
+      'nonpayable'
+    >
+    
+
+    
     setTreasury: TypedContractMethod<
       [newTreasury: AddressLike, ],
       [void],
@@ -532,6 +538,22 @@ decodeFunctionResult(functionFragment: 'unpause', data: BytesLike): Result;
       [],
       [void],
       'nonpayable'
+    >
+    
+
+    
+    suddenDeathExtension: TypedContractMethod<
+      [],
+      [bigint],
+      'view'
+    >
+    
+
+    
+    suddenDeathThreshold: TypedContractMethod<
+      [],
+      [bigint],
+      'view'
     >
     
 
@@ -582,37 +604,12 @@ getFunction(nameOrSignature: 'DIVIDEND_BPS'): TypedContractMethod<
       [bigint],
       'view'
     >;
-getFunction(nameOrSignature: 'FULL_RESET_DURATION'): TypedContractMethod<
-      [],
-      [bigint],
-      'view'
-    >;
-getFunction(nameOrSignature: 'LATE_PHASE_EXTENSION'): TypedContractMethod<
-      [],
-      [bigint],
-      'view'
-    >;
-getFunction(nameOrSignature: 'LATE_PHASE_THRESHOLD'): TypedContractMethod<
-      [],
-      [bigint],
-      'view'
-    >;
 getFunction(nameOrSignature: 'SAME_WALLET_COOLDOWN'): TypedContractMethod<
       [],
       [bigint],
       'view'
     >;
 getFunction(nameOrSignature: 'SEASON_DURATION'): TypedContractMethod<
-      [],
-      [bigint],
-      'view'
-    >;
-getFunction(nameOrSignature: 'SUDDEN_DEATH_EXTENSION'): TypedContractMethod<
-      [],
-      [bigint],
-      'view'
-    >;
-getFunction(nameOrSignature: 'SUDDEN_DEATH_THRESHOLD'): TypedContractMethod<
       [],
       [bigint],
       'view'
@@ -647,6 +644,11 @@ getFunction(nameOrSignature: 'dividendClaimed'): TypedContractMethod<
       [boolean],
       'view'
     >;
+getFunction(nameOrSignature: 'fullResetDuration'): TypedContractMethod<
+      [],
+      [bigint],
+      'view'
+    >;
 getFunction(nameOrSignature: 'getCurrentPhase'): TypedContractMethod<
       [],
       [string],
@@ -663,6 +665,16 @@ getFunction(nameOrSignature: 'getPressCost'): TypedContractMethod<
       'view'
     >;
 getFunction(nameOrSignature: 'getTimeRemaining'): TypedContractMethod<
+      [],
+      [bigint],
+      'view'
+    >;
+getFunction(nameOrSignature: 'latePhaseExtension'): TypedContractMethod<
+      [],
+      [bigint],
+      'view'
+    >;
+getFunction(nameOrSignature: 'latePhaseThreshold'): TypedContractMethod<
       [],
       [bigint],
       'view'
@@ -727,6 +739,11 @@ getFunction(nameOrSignature: 'seasons'): TypedContractMethod<
       [[bigint, bigint, bigint, bigint, bigint, bigint, bigint, bigint, bigint, bigint, boolean] & {id: bigint, startTime: bigint, endTime: bigint, totalRounds: bigint, totalPot: bigint, totalWinnerPayouts: bigint, totalDividendPools: bigint, totalTreasuryAmount: bigint, totalPresses: bigint, totalUniquePlayers: bigint, finalized: boolean }],
       'view'
     >;
+getFunction(nameOrSignature: 'setTimingConfig'): TypedContractMethod<
+      [newFullResetDuration: BigNumberish, newLatePhaseThreshold: BigNumberish, newSuddenDeathThreshold: BigNumberish, newLatePhaseExtension: BigNumberish, newSuddenDeathExtension: BigNumberish, ],
+      [void],
+      'nonpayable'
+    >;
 getFunction(nameOrSignature: 'setTreasury'): TypedContractMethod<
       [newTreasury: AddressLike, ],
       [void],
@@ -736,6 +753,16 @@ getFunction(nameOrSignature: 'settleRound'): TypedContractMethod<
       [],
       [void],
       'nonpayable'
+    >;
+getFunction(nameOrSignature: 'suddenDeathExtension'): TypedContractMethod<
+      [],
+      [bigint],
+      'view'
+    >;
+getFunction(nameOrSignature: 'suddenDeathThreshold'): TypedContractMethod<
+      [],
+      [bigint],
+      'view'
     >;
 getFunction(nameOrSignature: 'transferOwnership'): TypedContractMethod<
       [newOwner: AddressLike, ],
@@ -762,6 +789,7 @@ getEvent(key: 'RoundSettled'): TypedContractEvent<RoundSettledEvent.InputTuple, 
 getEvent(key: 'RoundStarted'): TypedContractEvent<RoundStartedEvent.InputTuple, RoundStartedEvent.OutputTuple, RoundStartedEvent.OutputObject>;
 getEvent(key: 'SeasonFinalized'): TypedContractEvent<SeasonFinalizedEvent.InputTuple, SeasonFinalizedEvent.OutputTuple, SeasonFinalizedEvent.OutputObject>;
 getEvent(key: 'SeasonStarted'): TypedContractEvent<SeasonStartedEvent.InputTuple, SeasonStartedEvent.OutputTuple, SeasonStartedEvent.OutputObject>;
+getEvent(key: 'TimingConfigUpdated'): TypedContractEvent<TimingConfigUpdatedEvent.InputTuple, TimingConfigUpdatedEvent.OutputTuple, TimingConfigUpdatedEvent.OutputObject>;
 getEvent(key: 'TreasuryUpdated'): TypedContractEvent<TreasuryUpdatedEvent.InputTuple, TreasuryUpdatedEvent.OutputTuple, TreasuryUpdatedEvent.OutputObject>;
 getEvent(key: 'Unpaused'): TypedContractEvent<UnpausedEvent.InputTuple, UnpausedEvent.OutputTuple, UnpausedEvent.OutputObject>;
 
@@ -801,6 +829,10 @@ getEvent(key: 'Unpaused'): TypedContractEvent<UnpausedEvent.InputTuple, Unpaused
 
       'SeasonStarted(uint256,uint64,uint64)': TypedContractEvent<SeasonStartedEvent.InputTuple, SeasonStartedEvent.OutputTuple, SeasonStartedEvent.OutputObject>;
       SeasonStarted: TypedContractEvent<SeasonStartedEvent.InputTuple, SeasonStartedEvent.OutputTuple, SeasonStartedEvent.OutputObject>;
+    
+
+      'TimingConfigUpdated(uint256,uint256,uint256,uint256,uint256)': TypedContractEvent<TimingConfigUpdatedEvent.InputTuple, TimingConfigUpdatedEvent.OutputTuple, TimingConfigUpdatedEvent.OutputObject>;
+      TimingConfigUpdated: TypedContractEvent<TimingConfigUpdatedEvent.InputTuple, TimingConfigUpdatedEvent.OutputTuple, TimingConfigUpdatedEvent.OutputObject>;
     
 
       'TreasuryUpdated(address,address)': TypedContractEvent<TreasuryUpdatedEvent.InputTuple, TreasuryUpdatedEvent.OutputTuple, TreasuryUpdatedEvent.OutputObject>;

@@ -79,16 +79,18 @@ export default function InstructionsModal({
 
           <Section title="Round timer">
             <ul style={list}>
-              <li>Each round starts with a 12 hour timer.</li>
+              <li>Each round starts with a 3 minute timer.</li>
               <li>
-                If there is more than 1 hour left, a press resets it to 12
-                hours.
+                If there is more than 60 seconds left, a press resets it to 3
+                minutes.
               </li>
               <li>
-                If there is less than 1 hour left, a press adds 10 minutes.
+                If there is less than 60 seconds or less left, a press adds 30
+                seconds.
               </li>
               <li>
-                If there are less than 10 minutes left, a press adds 30 seconds.
+                If there are less than 15 seconds left or less, a press adds 10
+                seconds.
               </li>
             </ul>
           </Section>
