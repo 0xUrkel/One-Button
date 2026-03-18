@@ -282,21 +282,22 @@ export default function HomePage() {
       />
 
       <main className="container sketch-shell">
-        <section className="compact-hero">
+        <section className="compact-hero compact-hero-tight">
           <div className="compact-hero-copy">
             <h1>One Button</h1>
             <p>Last presser wins the pot.</p>
           </div>
 
-          <div className="compact-hero-actions">
+          <div className="compact-hero-actions compact-hero-actions-stack">
+            <ConnectWalletButton />
+
             <button
               onClick={() => setInstructionsOpen(true)}
-              className="ghost-button hero-secondary-button"
+              className="hero-inline-link"
+              type="button"
             >
-              How It Works
+              How it works
             </button>
-
-            <ConnectWalletButton />
           </div>
         </section>
 
@@ -305,10 +306,6 @@ export default function HomePage() {
         {isLeader ? (
           <div className="leading-banner">🔥 You’re leading.</div>
         ) : null}
-
-        <div className="sketch-status-row">
-          <StatusBadge phase={currentPhase} danger={isDanger} />
-        </div>
 
         <section
           className={`sketch-timer-card hero-timer-card ${
@@ -346,24 +343,24 @@ export default function HomePage() {
           </div>
         </section>
 
-        <section className="sketch-action-card action-card-compact">
-          <div className="action-card-top">
-            <div className="sketch-action-label">Make Your Move</div>
+        <section className="sketch-action-card action-card-compact action-card-centered">
+          <div className="sketch-action-label">Make Your Move</div>
 
-            <div className="sketch-cost-wrap">
-              <div className="sketch-cost-label">
-                {isConnected ? "Next Press Cost" : "First Press Starts At"}
-              </div>
+          <div className="sketch-cost-wrap sketch-cost-wrap-centered">
+            <div className="sketch-cost-label">
+              {isConnected ? "Next Press Cost" : "First Press Starts At"}
+            </div>
 
-              <div className="sketch-cost-value">
-                {isConnected && pressCost
-                  ? `${formatAvax(pressCost)} AVAX`
-                  : "0.10 AVAX"}
-              </div>
+            <div className="sketch-cost-value">
+              {isConnected && pressCost
+                ? `${formatAvax(pressCost)} AVAX`
+                : "0.10 AVAX"}
             </div>
           </div>
 
-          <p className="action-card-helper">{helperText}</p>
+          <p className="action-card-helper action-card-helper-centered">
+            {helperText}
+          </p>
 
           {justPressed ? (
             <div className="action-success">Press submitted.</div>

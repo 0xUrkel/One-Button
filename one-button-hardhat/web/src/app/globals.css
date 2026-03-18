@@ -366,8 +366,8 @@ button:disabled {
 }
 
 .secondary-ghost-button {
-  min-height: 48px;
-  border-radius: 14px;
+  min-height: 42px;
+  border-radius: 15px;
 }
 
 .action-caption {
@@ -670,11 +670,12 @@ button:disabled {
   }
 
   .compact-hero-copy h1 {
-    font-size: 30px;
+    font-size: 28px;
   }
 
   .compact-hero-copy p {
-    font-size: 14px;
+    margin-top: 4px;
+    font-size: 13px;
   }
 
   .compact-hero-actions {
@@ -690,12 +691,11 @@ button:disabled {
   }
 
   .stats-strip-item {
-    padding: 10px;
-    border-radius: 16px;
+    padding: 9px 10px;
   }
 
   .stats-strip-value {
-    font-size: 18px;
+    font-size: 16px;
   }
 
   .sketch-timer-card {
