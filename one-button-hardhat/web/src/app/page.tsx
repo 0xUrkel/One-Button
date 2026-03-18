@@ -343,13 +343,20 @@ export default function HomePage() {
           <div className="sketch-action-meta">
             <div>
               <div className="sketch-action-label">Make Your Move</div>
-              <div className="sketch-cost-label">Next Press Cost</div>
+              <div className="sketch-cost-label">
+                {isConnected ? "Next Press Cost" : "First Press Starts At"}
+              </div>{" "}
               <div className="sketch-cost-value">
-                {formatAvax(pressCost)} AVAX
+                {isConnected && pressCost
+                  ? `${formatAvax(pressCost)} AVAX`
+                  : "0.10 AVAX"}{" "}
               </div>
             </div>
-
-            <div className="sketch-action-helper">{helperText}</div>
+            <div className="sketch-action-helper">
+              {isConnected
+                ? helperText
+                : "Connect wallet to jump in and take the lead."}
+            </div>{" "}
           </div>
 
           <div className="sketch-leader-inline">

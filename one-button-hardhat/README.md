@@ -1,232 +1,165 @@
-# One Button Game
+<h1 align="center">One Button</h1>
 
-A decentralized, on-chain social experiment built on **Avalanche**.
+<p align="center">
+  <img src="https://media2.giphy.com/media/v1.Y2lkPTc5MGI3NjExd2d1YzQ1cnJwcDR4OTR1NWppYjlrZnM2ZjZteGp4Z25iZjJjZjN5eSZlcD12MV9pbnRlcm5hbF9naWZfYnlfaWQmY3Q9Zw/GwRBmXyEOvFtK/giphy.gif" width="600"/>
+</p>
 
-Inspired by Reddit's famous **"The Button"**, this smart contract game
-turns a simple mechanic into an economic game of timing, strategy, and
-risk.
+<p align="center">
+  <a href="https://one-button-mu.vercel.app">
+    <img src="https://img.shields.io/badge/PLAY%20LIVE-FF3B3B?style=for-the-badge&logo=vercel&logoColor=white"/>
+  </a>
+</p>
 
-Every press increases the pot. Every press resets the clock. When the
-timer hits zero, **the last player to press wins**.
-
----
-
-# Game Mechanics
-
-## Timer
-
-Each round begins with a **12 hour timer**.
-
-## Pressing the Button
-
-Players can press the button by sending AVAX. Each player's press cost
-**increases exponentially**.
-
-Initial press cost:
-
-0.1 AVAX
-
-Each additional press by the same wallet:
-
-cost = previous_cost \* 1.35
-
-Example:
-
-Press Cost
+<p align="center">
+  A real-time, on-chain social game where <b>anyone can press the button</b> — but only one player wins the pot.
+</p>
 
 ---
 
-1 0.10 AVAX
-2 0.135 AVAX
-3 0.18225 AVAX
-4 0.246 AVAX
+## ⚡ Core Concept
+
+- Press the button → become the leader
+- Timer resets
+- Next press costs more
+- If no one presses before time runs out...
+- 🏆 **Leader wins the pot**
 
 ---
 
-# Timer Extensions
+## 🧠 Game Loop
 
-## Normal Mode
-
-Remaining time \> 1 hour
-
-Press effect: Timer resets to 12 hours
-
-## Late Mode
-
-Remaining time \< 1 hour
-
-Press effect: +10 minutes
-
-## Sudden Death
-
-Remaining time \< 10 minutes
-
-Press effect: +30 seconds
-
-This creates intense end-game battles.
+1.  Player presses button (pays AVAX)
+2.  Becomes current leader
+3.  Timer resets
+4.  Others try to steal the lead
+5.  Last player standing when timer hits 0 wins
 
 ---
 
-# Cooldown Protection
+## 🎮 Features
 
-same wallet cooldown = 10 seconds
-
----
-
-# Pot Distribution
-
-When the timer reaches zero:
-
-Winner: 80% Dividend Pool: 10% Treasury: 10%
+- 🔥 Real-time countdown pressure
+- 💀 "Sniped" feedback when you lose the lead
+- 🏆 Live leaderboard
+- 💰 Increasing press cost
+- 📊 Pot grows with each press
+- ⚡ Fast wallet-based gameplay (no signup)
 
 ---
 
-# Dividend System
+## 🧱 Tech Stack
 
-Players who pressed the button share **10% of the pot**.
+### Frontend
 
-Dividend payout is proportional to how much AVAX they contributed.
+- Next.js (App Router)
+- React
+- Wagmi + Viem
+- RainbowKit
 
-Example:
+### Backend
 
-Player A contributed 2 AVAX\
-Total pot contributions = 10 AVAX
+- Next.js API Routes
+- Lightweight JSON storage (MVP)
 
-Player A receives:
+### Smart Contracts
 
-(2 / 10) \* dividend_pool
-
-Dividends are claimed via:
-
-claimDividend(roundId)
-
----
-
-# Rounds and Seasons
-
-## Rounds
-
-A round ends when the timer reaches zero.
-
-Immediately after settlement: a new round begins
-
-## Seasons
-
-Seasons last:
-
-14 days
-
-Season statistics track: - total rounds - total presses - total pot
-volume - unique players
-
-When a season ends: a new season automatically starts
+- Solidity (Foundry)
+- Avalanche Fuji Testnet
 
 ---
 
-# Dead Round Recovery
+## 📁 Project Structure
 
-If nobody presses during a round and 12 hours pass:
-
-rollRoundIfExpiredWithoutPresses()
-
-This rolls the game forward safely.
-
----
-
-# Smart Contract Architecture
-
-Key structures: - Round - Season - Player press counts - Player
-contributions - Dividend claims
-
-Security primitives from **OpenZeppelin**.
+    one-button-hardhat/
+    ├── contracts/        # Solidity contracts
+    ├── script/           # Deployment scripts
+    ├── test/             # Contract tests
+    ├── web/              # Next.js frontend
+    │   ├── src/
+    │   └── app/
+    └── README.md
 
 ---
 
-# Contract Functions
+## 🚀 Getting Started
 
-## Game Actions
+### 1. Install dependencies
 
-press()\
-settleRound()\
-claimDividend(roundId)\
-rollRoundIfExpiredWithoutPresses()
-
-## Read Functions
-
-getCurrentPressCost(address)\
-getTimeRemaining()\
-getCurrentPhase()
-
----
-
-# Tech Stack
-
-- Solidity 0.8.24
-- Hardhat
-- Avalanche C-Chain
-- OpenZeppelin Contracts
-- TypeScript tests
-- Mocha / Chai
-
----
-
-# Running the Project
-
-Install dependencies:
-
+```bash
+cd web
 npm install
+```
 
-Compile:
+### 2. Set environment variables
 
-npm run compile
+Create `.env.local`:
 
-Run tests:
+    NEXT_PUBLIC_CONTRACT_ADDRESS=your_contract
+    NEXT_PUBLIC_WALLETCONNECT_PROJECT_ID=your_project_id
 
-npm test
+### 3. Run locally
 
----
-
-# Project Structure
-
-contracts/ OneButtonGame.sol
-
-test/ OneButtonGame.ts
-
-scripts/
-
-ignition/ modules/
-
-hardhat.config.ts package.json
+```bash
+npm run dev
+```
 
 ---
 
-# Deployment
+## 🧪 Smart Contracts (Foundry)
 
-Example deployment:
-
-npx hardhat ignition deploy ignition/modules/OneButtonGame.ts --network
-fuji
-
----
-
-# Future Features
-
-- On‑chain leaderboard
-- Wallet → Twitter identity linking
-- Web frontend (Next.js + wagmi)
-- Real‑time activity feed
-- Season champion rewards
-- Analytics dashboard
+```bash
+forge build
+forge test
+```
 
 ---
 
-# License
+## 🌐 Deployment
+
+### Vercel
+
+- Import repo
+- Set root directory to `/web`
+- Add env vars
+- Deploy
+
+---
+
+## 🎯 Roadmap
+
+- [ ] Persistent leaderboard (DB)
+- [ ] Multi-round seasons
+- [ ] Mobile UX polish
+- [ ] Social identity layer (optional)
+- [ ] Prize distribution UI
+
+---
+
+## ⚠️ Notes
+
+- Current leaderboard uses local JSON storage (non-persistent in
+  serverless)
+- Built for speed and experimentation
+- Designed to evolve based on real player behavior
+
+---
+
+## 🧠 Vision
+
+Turn simple mechanics into **high-stakes social tension**
+
+> The longer you wait, the more it costs.\
+> The closer it gets, the more it hurts.
+
+---
+
+## 👤 Author
+
+**0xUrkel**\
+Builder. Engineer. Game designer.
+
+---
+
+## 🪪 License
 
 MIT
-
----
-
-# Inspiration
-
-Inspired by Reddit's **The Button**, reimagined as a fully on‑chain game
-economy.
