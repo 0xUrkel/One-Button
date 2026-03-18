@@ -1,0 +1,5 @@
+export const CONTRACT_ADDRESS = process.env
+  .NEXT_PUBLIC_CONTRACT_ADDRESS as `0x${string}`;
+
+export const EMPTY_ADDRESS =
+  "0x0000000000000000000000000000000000000000" as const;

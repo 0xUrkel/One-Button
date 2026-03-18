@@ -1,0 +1,80 @@
+{
+  "profiles": {},
+  "leaderboard": {
+    "0x9b8d6ff40c39b5e2af4a31a2eaf527a5f5423301": {
+      "wallet": "0x9b8d6ff40c39b5e2af4a31a2eaf527a5f5423301",
+      "presses": 1,
+      "avaxContributed": "0.1822",
+      "lastPressTime": "2026-03-18T17:32:38.733Z",
+      "isWinning": false,
+      "lastTxHash": "0x1c14c178832848661021f7f2f82e3054e31b9aa15319e6c0312ed56340e02212",
+      "profile": null
+    },
+    "0xd679ae94aa5b95824aa7df2fb45e45c4ad0e2ccd": {
+      "wallet": "0xd679ae94aa5b95824aa7df2fb45e45c4ad0e2ccd",
+      "presses": 1,
+      "avaxContributed": "0.1",
+      "lastPressTime": "2026-03-18T17:34:19.512Z",
+      "isWinning": true,
+      "lastTxHash": "0x19d498face43ef7ad56b6455ff3284699605b06e2337ed178a4f67106578a52d",
+      "profile": null
+    }
+  },
+  "nonces": {
+    "0x2f1e4aff1a629d402616cec2e23e3d2a1a760e4c": {
+      "nonce": "5f82ef8770ff7aef5e78adfa683329c1",
+      "message": "One Button wants to link your X profile.\n\nWallet: 0x2f1e4aff1a629d402616cec2e23e3d2a1a760e4c\nNonce: 5f82ef8770ff7aef5e78adfa683329c1",
+      "createdAt": "2026-03-18T17:10:48.584Z"
+    }
+  },
+  "pendingLinks": {
+    "1e322134f969e18f6db66f4eb6c3f512": {
+      "wallet": "0x2f1e4aff1a629d402616cec2e23e3d2a1a760e4c",
+      "nonce": "d5b214b3465a586dfad71244588937ab",
+      "signature": "0x4e0296430a8333a000b5b3e8a625aea365edfd7e3134941e9f785dbbf0930b9e4c6ebbebc2ba3c11629810a02fb74b5c97e2d6d54a5e261dd118fe8c08abb6171b",
+      "state": "1e322134f969e18f6db66f4eb6c3f512",
+      "codeVerifier": "aKKGivxY9QaqqujdG_g1eSVpZ2s0VFH-i3p7Zez03e3JFcyk5TJZStKKNTvK62QA",
+      "createdAt": "2026-03-18T16:42:30.532Z"
+    },
+    "5f44a55c8cd1dcea1f0513287f6ff972": {
+      "wallet": "0x2f1e4aff1a629d402616cec2e23e3d2a1a760e4c",
+      "nonce": "d5b214b3465a586dfad71244588937ab",
+      "signature": "0x4e0296430a8333a000b5b3e8a625aea365edfd7e3134941e9f785dbbf0930b9e4c6ebbebc2ba3c11629810a02fb74b5c97e2d6d54a5e261dd118fe8c08abb6171b",
+      "state": "5f44a55c8cd1dcea1f0513287f6ff972",
+      "codeVerifier": "Lx_wF0_GoUgP5mKX17xZ3rub8ByvLzg1kouALADtbClDfaTGGy7dOeFs8I4-zA_V",
+      "createdAt": "2026-03-18T16:54:42.546Z"
+    },
+    "99abf53ab2f1ebb8f4cfc040642d4029": {
+      "wallet": "0x2f1e4aff1a629d402616cec2e23e3d2a1a760e4c",
+      "nonce": "9af22a50bba18c115fb80952c79feeb0",
+      "signature": "0x7b9bfa37b28d3f93b5725f913c42c70d9439501eabdf87bdb4432b6e5f0bea0261168074b9c1f8370deec5eafe998a0fdaee68ee3026af22b2623fc9a05b03c41b",
+      "state": "99abf53ab2f1ebb8f4cfc040642d4029",
+      "codeVerifier": "GTWMyGDSoAfkAv8K4t7ZqdTNZK3blFrmkqTYgrTaiwUfMVRN-kc0uiTPdFy0H5Pm",
+      "createdAt": "2026-03-18T16:56:42.583Z"
+    },
+    "efaac8e81abbf53ac76130737fbc53ac": {
+      "wallet": "0x2f1e4aff1a629d402616cec2e23e3d2a1a760e4c",
+      "nonce": "eece403baeb51f9d1e43c6ce8ca1e8a1",
+      "signature": "0x24f85d5e4cbb7b7c5f29c7f6be4915cc2ecf8690f29fe756fc31474a9e0eae6c366f609162525ee3cda3fd7df75fe80c1dbc1f6f9e78006433027f85046694e21b",
+      "state": "efaac8e81abbf53ac76130737fbc53ac",
+      "codeVerifier": "79IUeZ32mtRggOzPcBHRlwETj4-KAYWNsK04QhThsD35mMKReZiwrLhLuKrQ9jD9",
+      "createdAt": "2026-03-18T16:57:48.971Z"
+    },
+    "4818a6be0bcd4790c6c92b7735af9568": {
+      "wallet": "0x2f1e4aff1a629d402616cec2e23e3d2a1a760e4c",
+      "nonce": "58e7170420f60063127bb22f080c092e",
+      "signature": "0x81037f2747e714e8d7a4766a4214b37da61c55a224b5a132e25c95772326de2a57c53a7a42a302fa8b196ba795d734a1cc290624cc3393590a26b1520c03f2771c",
+      "state": "4818a6be0bcd4790c6c92b7735af9568",
+      "codeVerifier": "LmYZo0Zp0-TnmDeoSXJHfjKMgkhoSOAyQ3WGQ_AJXcKK3lj3Le3w0RSj392niShx",
+      "createdAt": "2026-03-18T17:03:18.739Z"
+    },
+    "a2d7165fb3822bfc7f7169d511d756e9": {
+      "wallet": "0x2f1e4aff1a629d402616cec2e23e3d2a1a760e4c",
+      "nonce": "5f82ef8770ff7aef5e78adfa683329c1",
+      "signature": "0x785a70a9ad9fd93d215dfaee0df8f4719ac3698b5e7f4ba6dcd5176ab38990703392b13f59eda2af7d81f34c57a62e5ea5d57fe828bbfe7a59af775b781dcfa31b",
+      "state": "a2d7165fb3822bfc7f7169d511d756e9",
+      "codeVerifier": "YDBzTsI--t7wvr47_-Ibq7NVjRPeeC_MV98xmqcX-GhRniWCXsnEOmtpdNb16beK",
+      "createdAt": "2026-03-18T17:10:54.368Z"
+    }
+  }
+}
