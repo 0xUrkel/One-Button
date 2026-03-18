@@ -64,7 +64,7 @@
 ### Smart Contracts
 
 - Solidity (Foundry)
-- Avalanche Fuji Testnet
+- Avalanche
 
 ---
 

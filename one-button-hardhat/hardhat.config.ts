@@ -37,7 +37,7 @@ export default defineConfig({
       accounts: PRIVATE_KEY ? [PRIVATE_KEY] : [],
     },
 
-    avalanche: {
+    mainnet: {
       type: "http",
       chainType: "generic",
       url: AVALANCHE_RPC_URL,
