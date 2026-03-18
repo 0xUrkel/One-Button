@@ -151,6 +151,18 @@ export default function InstructionsModal({
               <li>If you contributed, claim your dividend after settlement.</li>
             </ol>
           </Section>
+          <div className="help-section">
+            <p className="help-text">"Confused? Ask the creator"</p>
+
+            <a
+              href="https://x.com/0xUrkel"
+              target="_blank"
+              rel="noopener noreferrer"
+              className="help-button"
+            >
+              Message @0xUrkel on X
+            </a>
+          </div>
         </div>
       </div>
     </div>

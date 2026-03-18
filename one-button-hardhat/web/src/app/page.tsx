@@ -416,6 +416,14 @@ export default function HomePage() {
           </section>
         ) : null}
       </main>
+      <a
+        href="https://x.com/0xUrkel"
+        target="_blank"
+        rel="noopener noreferrer"
+        className="floating-help"
+      >
+        ?
+      </a>
     </>
   );
 }
