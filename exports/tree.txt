@@ -1,0 +1,95 @@
+one-button-hardhat
+├── ignition/
+│   └── modules/
+│       └── OneButtonGame.ts
+├── one-button-hardhat/
+│   ├── ignition/
+│   │   ├── deployments/
+│   │   │   └── chain-43113/
+│   │   │       ├── build-info/
+│   │   │       │   └── solc-0_8_24-1359a41d4a972e6bc7e8056132718f70f7adbe48.json
+│   │   │       └── deployed_addresses.json
+│   │   └── modules/
+│   │       └── OneButtonGame.ts
+│   ├── test/
+│   │   └── OneButtonGame.ts
+│   ├── types/
+│   │   └── ethers-contracts/
+│   │       ├── factories/
+│   │       │   ├── index.ts
+│   │       │   └── OneButtonGame__factory.ts
+│   │       ├── common.ts
+│   │       ├── hardhat.d.ts
+│   │       ├── index.ts
+│   │       └── OneButtonGame.ts
+│   ├── web/
+│   │   ├── .data/
+│   │   │   └── one-button-social.json
+│   │   ├── src/
+│   │   │   ├── app/
+│   │   │   │   ├── api/
+│   │   │   │   │   ├── leaderboard/
+│   │   │   │   │   │   ├── record/
+│   │   │   │   │   │   │   └── route.ts
+│   │   │   │   │   │   └── route.ts
+│   │   │   │   │   ├── profile/
+│   │   │   │   │   │   └── route.ts
+│   │   │   │   │   └── x/
+│   │   │   │   │       ├── callback/
+│   │   │   │   │       │   └── route.ts
+│   │   │   │   │       ├── prepare/
+│   │   │   │   │       │   └── route.ts
+│   │   │   │   │       └── start/
+│   │   │   │   │           └── route.ts
+│   │   │   │   ├── globals.css
+│   │   │   │   ├── layout.tsx
+│   │   │   │   ├── page.tsx
+│   │   │   │   └── providers.tsx
+│   │   │   ├── components/
+│   │   │   │   ├── ConnectWalletButton.tsx
+│   │   │   │   ├── GameHeader.tsx
+│   │   │   │   ├── GameStatsCard.tsx
+│   │   │   │   ├── InstructionsModal.tsx
+│   │   │   │   ├── LeaderboardModal.tsx
+│   │   │   │   ├── LeaderCard.tsx
+│   │   │   │   ├── PlayerActionCard.tsx
+│   │   │   │   ├── RoundMaintenanceCard.tsx
+│   │   │   │   ├── StatusBadge.tsx
+│   │   │   │   └── TwitterIdentityButton.tsx
+│   │   │   └── lib/
+│   │   │       ├── abi/
+│   │   │       │   └── oneButtonGameAbi.ts
+│   │   │       ├── config/
+│   │   │       │   └── wagmi.ts
+│   │   │       ├── server/
+│   │   │       │   ├── db.ts
+│   │   │       │   └── xAuth.ts
+│   │   │       ├── types/
+│   │   │       │   └── social.ts
+│   │   │       ├── constants.ts
+│   │   │       └── format.ts
+│   │   ├── next-env.d.ts
+│   │   ├── next.config.ts
+│   │   ├── package.json
+│   │   └── tsconfig.json
+│   ├── .gitignore
+│   ├── hardhat.config.ts
+│   ├── package.json
+│   ├── README.md
+│   └── tsconfig.json
+├── test/
+│   └── OneButtonGame.ts
+├── types/
+│   └── ethers-contracts/
+│       ├── factories/
+│       │   ├── index.ts
+│       │   └── OneButtonGame__factory.ts
+│       ├── common.ts
+│       ├── hardhat.d.ts
+│       ├── index.ts
+│       └── OneButtonGame.ts
+├── .gitignore
+├── hardhat.config.ts
+├── package.json
+├── README.md
+└── tsconfig.json

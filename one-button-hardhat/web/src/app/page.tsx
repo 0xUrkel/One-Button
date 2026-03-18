@@ -7,7 +7,7 @@ import { CONTRACT_ADDRESS, EMPTY_ADDRESS } from "@/lib/constants";
 import { oneButtonGameAbi } from "@/lib/abi/oneButtonGameAbi";
 import { formatAvax, formatSeconds, shortenAddress } from "@/lib/format";
 
-import GameHeader from "@/components/GameHeader";
+import ConnectWalletButton from "@/components/ConnectWalletButton";
 import InstructionsModal from "@/components/InstructionsModal";
 import StatusBadge from "@/components/StatusBadge";
 import RoundMaintenanceCard from "@/components/RoundMaintenanceCard";
@@ -80,114 +80,103 @@ export default function HomePage() {
   });
 
   useEffect(() => {
-    if (timeRemaining !== undefined) {
-      setDisplayTimeRemaining(timeRemaining);
-    }
+    if (timeRemaining === undefined) return;
+    setDisplayTimeRemaining(timeRemaining);
   }, [timeRemaining]);
 
   useEffect(() => {
-    const interval = setInterval(() => {
+    const tick = window.setInterval(() => {
+      setNowMs(Date.now());
       setDisplayTimeRemaining((prev) => (prev > 0n ? prev - 1n : 0n));
     }, 1000);
 
-    return () => clearInterval(interval);
+    return () => window.clearInterval(tick);
   }, []);
 
-  useEffect(() => {
-    const interval = setInterval(() => {
-      setNowMs(Date.now());
-    }, 1000);
+  const isOwner = useMemo(() => {
+    if (!address || !ownerAddress) return false;
+    return address.toLowerCase() === ownerAddress.toLowerCase();
+  }, [address, ownerAddress]);
 
-    return () => clearInterval(interval);
-  }, []);
+  const roundTuple = roundData as readonly unknown[] | undefined;
 
-  const timeLeftLabel = useMemo(
-    () => formatSeconds(displayTimeRemaining),
-    [displayTimeRemaining],
-  );
+  const leaderAddress = useMemo(() => {
+    const candidate = roundTuple?.[2];
+    return typeof candidate === "string" ? candidate : undefined;
+  }, [roundTuple]);
 
-  const isDanger = displayTimeRemaining <= 60n;
-  const isCritical = displayTimeRemaining <= 10n;
+  const timeLeftLabel = useMemo(() => {
+    return formatSeconds(displayTimeRemaining);
+  }, [displayTimeRemaining]);
 
-  const isOwner =
-    !!address &&
-    !!ownerAddress &&
-    address.toLowerCase() === ownerAddress.toLowerCase();
+  const isDanger = useMemo(() => {
+    const secs = Number(displayTimeRemaining ?? 0n);
+    return secs <= 3600;
+  }, [displayTimeRemaining]);
 
-  const lastCompletedRoundId =
-    currentRoundId !== undefined && currentRoundId > 1n
-      ? currentRoundId - 1n
-      : undefined;
+  const isCritical = useMemo(() => {
+    const secs = Number(displayTimeRemaining ?? 0n);
+    return secs <= 600;
+  }, [displayTimeRemaining]);
 
-  const leaderAddress =
-    roundData?.[10] && roundData[10] !== EMPTY_ADDRESS
-      ? String(roundData[10])
-      : undefined;
+  const isLeader = useMemo(() => {
+    if (!address || !leaderAddress) return false;
+    return address.toLowerCase() === leaderAddress.toLowerCase();
+  }, [address, leaderAddress]);
 
-  const leaderEntry = useMemo(() => {
-    if (!leaderAddress) return undefined;
-    return leaderboard.find(
-      (entry) => entry.wallet.toLowerCase() === leaderAddress.toLowerCase(),
-    );
-  }, [leaderAddress, leaderboard]);
+  const helperText = useMemo(() => {
+    if (!isConnected) return "Connect wallet to jump in and take the lead.";
+    if (isLeader)
+      return "You’re in front. Defend the lead until the timer hits zero.";
+    if (isCritical) return "Sudden death. Every second matters now.";
+    if (isDanger) return "The window is tight. One press can swing the round.";
+    return "Press to take the lead before someone else does.";
+  }, [isConnected, isLeader, isCritical, isDanger]);
 
-  const isLeader =
-    !!address &&
-    !!leaderAddress &&
-    address.toLowerCase() === leaderAddress.toLowerCase();
+  const ctaText = useMemo(() => {
+    if (!isConnected) return "Connect Wallet to Play";
+    if (isPending) return "Submitting...";
+    if (isLeader) return "Defend Your Lead";
+    return "Press the Button";
+  }, [isConnected, isLeader, isPending]);
 
-  const helperText = isLeader
-    ? isCritical
-      ? "🔥 You’re leading. Survive the final seconds."
-      : isDanger
-      ? "🔥 You’re leading. Defend your spot."
-      : "🔥 You’re leading right now."
-    : isCritical
-    ? "Take the lead before the final seconds end."
-    : isDanger
-    ? "Take the lead before someone else snipes it."
-    : "Take the lead before someone else does.";
-
-  const ctaText = isLeader
-    ? isCritical
-      ? "🔥 HOLD THE LEAD"
-      : "You’re Leading"
-    : isCritical
-    ? "🚨 STEAL IT NOW"
-    : isDanger
-    ? "🔥 STEAL THE POT"
-    : "Press the Button";
+  const lastCompletedRoundId = useMemo(() => {
+    if (currentRoundId === undefined || currentRoundId === 0n) return undefined;
+    return currentRoundId - 1n;
+  }, [currentRoundId]);
 
   const lastPressAgo = useMemo(() => {
-    const value = leaderEntry?.lastPressTime;
-    if (!value) return "Unknown";
+    const raw = roundTuple?.[3];
+    if (typeof raw !== "bigint" || raw === 0n) return "Unknown";
 
-    const timestamp = new Date(value).getTime();
-    if (Number.isNaN(timestamp)) return value;
+    const diffSeconds = Math.max(
+      0,
+      Math.floor((nowMs - Number(raw) * 1000) / 1000),
+    );
 
-    const diffSeconds = Math.max(0, Math.floor((nowMs - timestamp) / 1000));
-
-    if (diffSeconds < 5) return "Just now";
+    if (diffSeconds < 5) return "just now";
     if (diffSeconds < 60) return `${diffSeconds}s ago`;
 
-    const diffMinutes = Math.floor(diffSeconds / 60);
-    if (diffMinutes < 60) return `${diffMinutes}m ago`;
+    const mins = Math.floor(diffSeconds / 60);
+    if (mins < 60) return `${mins}m ago`;
 
-    const diffHours = Math.floor(diffMinutes / 60);
-    if (diffHours < 24) return `${diffHours}h ago`;
+    const hours = Math.floor(mins / 60);
+    if (hours < 24) return `${hours}h ago`;
 
-    const diffDays = Math.floor(diffHours / 24);
-    return `${diffDays}d ago`;
-  }, [leaderEntry?.lastPressTime, nowMs]);
+    const days = Math.floor(hours / 24);
+    return `${days}d ago`;
+  }, [roundTuple, nowMs]);
 
   async function loadLeaderboard() {
+    setLeaderboardLoading(true);
+
     try {
-      setLeaderboardLoading(true);
       const res = await fetch("/api/leaderboard", { cache: "no-store" });
       if (!res.ok) {
         setLeaderboard([]);
         return;
       }
+
       const data = (await res.json()) as LeaderboardEntry[];
       setLeaderboard(Array.isArray(data) ? data : []);
     } catch {
@@ -257,7 +246,9 @@ export default function HomePage() {
                 isWinning: true,
               }),
             });
-          } catch {}
+          } catch {
+            // no-op
+          }
 
           void loadLeaderboard();
         },
@@ -291,7 +282,23 @@ export default function HomePage() {
       />
 
       <main className="container sketch-shell">
-        <GameHeader onOpenInstructions={() => setInstructionsOpen(true)} />
+        <section className="compact-hero">
+          <div className="compact-hero-copy">
+            <h1>One Button</h1>
+            <p>Last presser wins the pot.</p>
+          </div>
+
+          <div className="compact-hero-actions">
+            <button
+              onClick={() => setInstructionsOpen(true)}
+              className="ghost-button hero-secondary-button"
+            >
+              How It Works
+            </button>
+
+            <ConnectWalletButton />
+          </div>
+        </section>
 
         {snipedToast ? <div className="sniped-toast">{snipedToast}</div> : null}
 
@@ -303,31 +310,8 @@ export default function HomePage() {
           <StatusBadge phase={currentPhase} danger={isDanger} />
         </div>
 
-        <section className="sketch-top-row">
-          <div className="sketch-mini-card">
-            <div className="sketch-mini-label">Season</div>
-            <div className="sketch-mini-value">
-              {String(currentSeasonId ?? "-")}
-            </div>
-          </div>
-
-          <div className="sketch-mini-card">
-            <div className="sketch-mini-label">Round</div>
-            <div className="sketch-mini-value">
-              {String(currentRoundId ?? "-")}
-            </div>
-          </div>
-
-          <div className="sketch-mini-card sketch-pot-card">
-            <div className="sketch-mini-label">Pot</div>
-            <div className="sketch-mini-value">
-              {formatAvax(roundData?.[4])} AVAX
-            </div>
-          </div>
-        </section>
-
         <section
-          className={`sketch-timer-card ${
+          className={`sketch-timer-card hero-timer-card ${
             isDanger ? "sketch-timer-danger" : ""
           } ${isCritical ? "sketch-timer-critical" : ""}`}
         >
@@ -339,46 +323,47 @@ export default function HomePage() {
           </div>
         </section>
 
-        <section className="sketch-action-card">
-          <div className="sketch-action-meta">
-            <div>
-              <div className="sketch-action-label">Make Your Move</div>
+        <section className="stats-strip">
+          <div className="stats-strip-item">
+            <span className="stats-strip-label">Season</span>
+            <strong className="stats-strip-value">
+              {String(currentSeasonId ?? "-")}
+            </strong>
+          </div>
+
+          <div className="stats-strip-item">
+            <span className="stats-strip-label">Round</span>
+            <strong className="stats-strip-value">
+              {String(currentRoundId ?? "-")}
+            </strong>
+          </div>
+
+          <div className="stats-strip-item stats-strip-item-pot">
+            <span className="stats-strip-label">Pot</span>
+            <strong className="stats-strip-value">
+              {formatAvax(roundTuple?.[4] as bigint | undefined)} AVAX
+            </strong>
+          </div>
+        </section>
+
+        <section className="sketch-action-card action-card-compact">
+          <div className="action-card-top">
+            <div className="sketch-action-label">Make Your Move</div>
+
+            <div className="sketch-cost-wrap">
               <div className="sketch-cost-label">
                 {isConnected ? "Next Press Cost" : "First Press Starts At"}
-              </div>{" "}
+              </div>
+
               <div className="sketch-cost-value">
                 {isConnected && pressCost
                   ? `${formatAvax(pressCost)} AVAX`
-                  : "0.10 AVAX"}{" "}
+                  : "0.10 AVAX"}
               </div>
             </div>
-            <div className="sketch-action-helper">
-              {isConnected
-                ? helperText
-                : "Connect wallet to jump in and take the lead."}
-            </div>{" "}
           </div>
 
-          <div className="sketch-leader-inline">
-            <div className="sketch-leader-main">
-              <span className="sketch-leader-inline-label">
-                Last pressed by
-              </span>
-
-              <span className="sketch-leader-inline-value">
-                {leaderAddress ? shortenAddress(leaderAddress) : "-"}
-              </span>
-
-              <span className="last-press-meta">Last press {lastPressAgo}</span>
-            </div>
-
-            <button
-              className="ghost-button leaderboard-inline-button"
-              onClick={() => setLeaderboardOpen(true)}
-            >
-              View leaderboard
-            </button>
-          </div>
+          <p className="action-card-helper">{helperText}</p>
 
           {justPressed ? (
             <div className="action-success">Press submitted.</div>
@@ -389,28 +374,47 @@ export default function HomePage() {
             onClick={handlePress}
             className={`action-primary-button ${isDanger ? "pulse-cta" : ""}`}
           >
-            {isPending ? "Submitting..." : ctaText}
+            {ctaText}
           </button>
 
-          <div className="claim-block">
+          <div className="mobile-last-pressed">
+            <span className="mobile-last-pressed-label">Last press</span>
+            <span className="mobile-last-pressed-value">
+              {leaderAddress && leaderAddress !== EMPTY_ADDRESS
+                ? shortenAddress(leaderAddress)
+                : "-"}
+            </span>
+            <span className="mobile-last-pressed-meta">{lastPressAgo}</span>
+          </div>
+        </section>
+
+        <section className="secondary-actions-card">
+          <div className="secondary-actions-grid">
+            <button
+              className="ghost-button secondary-ghost-button"
+              onClick={() => setLeaderboardOpen(true)}
+            >
+              View Leaderboard
+            </button>
+
             <button
               disabled={
                 !isConnected || lastCompletedRoundId === undefined || isPending
               }
               onClick={handleClaimDividend}
-              className="action-secondary-button"
+              className="ghost-button secondary-ghost-button"
             >
               Claim Dividend
             </button>
+          </div>
 
-            <div className="action-caption">
-              Dividends become claimable after settlement.
-            </div>
+          <div className="action-caption secondary-caption">
+            Dividends become claimable after settlement.
           </div>
         </section>
 
         {isOwner ? (
-          <section style={{ marginTop: 10 }}>
+          <section style={{ marginTop: 4 }}>
             <RoundMaintenanceCard />
           </section>
         ) : null}

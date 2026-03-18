@@ -1,0 +1,60 @@
+# AI PROJECT DIGEST CHUNK
+
+Project: one-button-hardhat
+Goal: understand
+Chunk: 7/7
+
+## Suggested Prompt
+Explain this project clearly. Summarize its purpose, architecture, key files, main flows, and anything that looks incomplete or risky.
+
+## Project Tree
+one-button-hardhat
+└── ignition/
+    └── modules/
+        └── OneButtonGame.ts
+
+## Overview
+# Project Overview
+
+**Project:** one-button-hardhat
+**Root Path:** C:\Users\Creator\Documents\HardHat\OneButton\one-button-hardhat
+
+## Likely Languages
+- TypeScript
+- TypeScript React
+
+## Framework Hints
+- Node.js
+
+## Likely Entrypoints
+- types/ethers-contracts/index.ts
+- one-button-hardhat/types/ethers-contracts/index.ts
+- one-button-hardhat/types/ethers-contracts/factories/index.ts
+- types/ethers-contracts/factories/index.ts
+
+## Major Modules
+- contracts
+- ignition
+- one-button-hardhat
+- test
+- types
+
+## Risks
+- None detected
+
+## Notes
+- None detected
+
+
+## Included File Contents
+
+### FILE: ignition/modules/OneButtonGame.ts
+```ts
+import { buildModule } from "@nomicfoundation/hardhat-ignition/modules";
+
+export default buildModule("OneButtonGameModule", (m) => {
+  const treasury = m.getParameter("treasury", process.env.TREASURY_ADDRESS || "0x0000000000000000000000000000000000000001");
+  const game = m.contract("OneButtonGame", [treasury]);
+  return { game };
+});
+```
