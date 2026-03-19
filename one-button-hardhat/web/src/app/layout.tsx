@@ -2,7 +2,6 @@ import "./globals.css";
 import Providers from "./providers";
 import type { Metadata } from "next";
 import { Analytics } from "@vercel/analytics/react";
-import { SpeedInsights } from "@vercel/speed-insights/next";
 
 export const metadata: Metadata = {
   title: "One Button",
@@ -16,12 +15,7 @@ export default function RootLayout({
     <html lang="en">
       <body>
         <Providers>{children}</Providers>
-
-        {/* Vercel Analytics */}
         <Analytics />
-
-        {/* Optional but highly recommended */}
-        <SpeedInsights />
       </body>
     </html>
   );
