@@ -1,6 +1,7 @@
 import { config as dotenvConfig } from "dotenv";
 import { defineConfig } from "hardhat/config";
 import hardhatToolboxMochaEthersPlugin from "@nomicfoundation/hardhat-toolbox-mocha-ethers";
+import "@nomicfoundation/hardhat-ethers";
 
 dotenvConfig();
 

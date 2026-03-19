@@ -12,9 +12,11 @@
     "deploy:mainnet": "hardhat ignition deploy ./ignition/modules/OneButtonGame.ts --network mainnet"
   },
   "devDependencies": {
+    "@nomicfoundation/hardhat-ethers": "^4.0.6",
     "@nomicfoundation/hardhat-toolbox-mocha-ethers": "^3.0.0",
     "@openzeppelin/contracts": "^5.0.0",
     "dotenv": "^16.6.1",
+    "ethers": "^6.16.0",
     "hardhat": "^3.0.0",
     "typescript": "^5.5.0"
   },
