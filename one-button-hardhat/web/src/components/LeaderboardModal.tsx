@@ -38,20 +38,20 @@ export default function LeaderboardModal({
   return (
     <div onClick={onClose} style={overlay}>
       <div onClick={(e) => e.stopPropagation()} style={panel}>
-        <div style={headerRow}>
-          <div>
-            <h2 style={{ margin: 0, fontSize: 24 }}>Current Leaderboard</h2>
-            <p style={{ margin: "8px 0 0", opacity: 0.75, lineHeight: 1.5 }}>
+        <div className="leaderboard-modal-header">
+          <div className="leaderboard-modal-copy">
+            <h2 className="leaderboard-modal-title">Current Leaderboard</h2>
+            <p className="leaderboard-modal-subtitle">
               Climb the board, defend your lead, and survive the timer.
             </p>
           </div>
 
-          <button onClick={onClose} style={closeButton}>
+          <button onClick={onClose} className="leaderboard-close-button">
             Close
           </button>
         </div>
 
-        <div style={{ display: "grid", gap: 10 }}>
+        <div className="leaderboard-table-wrap">
           <div className="leaderboard-table-head">
             <div>Rank</div>
             <div>Player</div>
@@ -68,80 +68,118 @@ export default function LeaderboardModal({
               No leaderboard data yet. Be the first to press.
             </div>
           ) : (
-            entries.map((entry) => {
-              const isYou =
-                !!connectedWallet &&
-                connectedWallet.toLowerCase() === entry.wallet.toLowerCase();
+            <div className="leaderboard-table-body">
+              {entries.map((entry) => {
+                const isYou =
+                  !!connectedWallet &&
+                  connectedWallet.toLowerCase() === entry.wallet.toLowerCase();
 
-              const isCurrentLeader =
-                !!currentLeaderWallet &&
-                currentLeaderWallet.toLowerCase() ===
-                  entry.wallet.toLowerCase();
+                const isCurrentLeader =
+                  !!currentLeaderWallet &&
+                  currentLeaderWallet.toLowerCase() ===
+                    entry.wallet.toLowerCase();
 
-              const playerName =
-                entry.profile?.displayName ||
-                (entry.profile?.username
-                  ? `@${entry.profile.username}`
-                  : shortenAddress(entry.wallet));
+                const playerName =
+                  entry.profile?.displayName ||
+                  (entry.profile?.username
+                    ? `@${entry.profile.username}`
+                    : shortenAddress(entry.wallet));
 
-              return (
-                <div
-                  key={`${entry.rank}-${entry.wallet}`}
-                  className={`leaderboard-row ${
-                    isCurrentLeader ? "leaderboard-row-active" : ""
-                  }`}
-                >
-                  <div className="leaderboard-rank">#{entry.rank}</div>
+                return (
+                  <div
+                    key={entry.wallet}
+                    className={`leaderboard-row ${
+                      isCurrentLeader ? "leaderboard-row-active" : ""
+                    } ${isYou ? "leaderboard-row-you" : ""}`}
+                  >
+                    <div
+                      className="leaderboard-cell leaderboard-rank"
+                      data-label="Rank"
+                    >
+                      <span className="leaderboard-rank-pill">
+                        #{entry.rank}
+                      </span>
+                    </div>
 
-                  <div className="leaderboard-player">
-                    {entry.profile?.avatarUrl ? (
-                      <img
-                        src={entry.profile.avatarUrl}
-                        alt={playerName}
-                        className="leader-avatar"
-                      />
-                    ) : (
-                      <div className="leader-avatar leader-avatar-fallback">
-                        {playerName.slice(0, 1).toUpperCase()}
-                      </div>
-                    )}
+                    <div
+                      className="leaderboard-cell leaderboard-player"
+                      data-label="Player"
+                    >
+                      {entry.profile?.avatarUrl ? (
+                        <img
+                          src={entry.profile.avatarUrl}
+                          alt={playerName}
+                          className="leader-avatar"
+                        />
+                      ) : (
+                        <div className="leader-avatar leader-avatar-fallback">
+                          {playerName.slice(0, 1).toUpperCase()}
+                        </div>
+                      )}
 
-                    <div className="leaderboard-player-copy">
-                      <div className="leaderboard-player-name">
-                        {playerName}
-                      </div>
-                      <div className="leaderboard-player-wallet">
-                        {shortenAddress(entry.wallet)}
+                      <div className="leaderboard-player-copy">
+                        <div className="leaderboard-player-name">
+                          {playerName}
+                        </div>
+                        <div className="leaderboard-player-wallet">
+                          {shortenAddress(entry.wallet)}
+                        </div>
                       </div>
                     </div>
+
+                    <div
+                      className="leaderboard-cell leaderboard-number"
+                      data-label="Presses"
+                    >
+                      {entry.presses ?? "-"}
+                    </div>
+
+                    <div
+                      className="leaderboard-cell leaderboard-number"
+                      data-label="AVAX"
+                    >
+                      {entry.avaxContributed ?? "-"}
+                    </div>
+
+                    <div
+                      className="leaderboard-cell leaderboard-time"
+                      data-label="Last Press"
+                    >
+                      {formatLastPress(entry.lastPressTime)}
+                    </div>
+
+                    <div
+                      className="leaderboard-cell leaderboard-badges"
+                      data-label="Status"
+                    >
+                      {isCurrentLeader ? (
+                        <span className="leaderboard-badge leaderboard-badge-win">
+                          Leader
+                        </span>
+                      ) : null}
+
+                      {entry.isWinning && !isCurrentLeader ? (
+                        <span className="leaderboard-badge leaderboard-badge-hot">
+                          Hot
+                        </span>
+                      ) : null}
+
+                      {isYou ? (
+                        <span className="leaderboard-badge leaderboard-badge-you">
+                          You
+                        </span>
+                      ) : null}
+
+                      {!isCurrentLeader && !entry.isWinning && !isYou ? (
+                        <span className="leaderboard-badge leaderboard-badge-idle">
+                          Live
+                        </span>
+                      ) : null}
+                    </div>
                   </div>
-
-                  <div>{entry.presses ?? "-"}</div>
-                  <div>{entry.avaxContributed ?? "-"}</div>
-                  <div>{formatLastPress(entry.lastPressTime)}</div>
-
-                  <div className="leaderboard-badges">
-                    {isCurrentLeader ? (
-                      <span className="leaderboard-badge leaderboard-badge-win">
-                        Leader
-                      </span>
-                    ) : null}
-
-                    {entry.isWinning && !isCurrentLeader ? (
-                      <span className="leaderboard-badge leaderboard-badge-hot">
-                        Hot
-                      </span>
-                    ) : null}
-
-                    {isYou ? (
-                      <span className="leaderboard-badge leaderboard-badge-you">
-                        You
-                      </span>
-                    ) : null}
-                  </div>
-                </div>
-              );
-            })
+                );
+              })}
+            </div>
           )}
         </div>
       </div>
@@ -173,7 +211,7 @@ function formatLastPress(value?: string) {
 const overlay: React.CSSProperties = {
   position: "fixed",
   inset: 0,
-  background: "rgba(0,0,0,0.72)",
+  background: "rgba(0,0,0,0.76)",
   display: "flex",
   alignItems: "center",
   justifyContent: "center",
@@ -183,28 +221,13 @@ const overlay: React.CSSProperties = {
 
 const panel: React.CSSProperties = {
   width: "100%",
-  maxWidth: 980,
-  maxHeight: "85vh",
+  maxWidth: 1120,
+  maxHeight: "88vh",
   overflowY: "auto",
-  background: "#111214",
-  border: "1px solid #26272b",
-  borderRadius: 20,
+  background:
+    "linear-gradient(180deg, rgba(13,14,18,0.98), rgba(9,10,13,0.98))",
+  border: "1px solid rgba(255,255,255,0.08)",
+  borderRadius: 24,
   padding: 20,
-  boxShadow: "0 20px 60px rgba(0,0,0,0.45)",
-};
-
-const headerRow: React.CSSProperties = {
-  display: "flex",
-  justifyContent: "space-between",
-  alignItems: "flex-start",
-  gap: 16,
-  marginBottom: 16,
-};
-
-const closeButton: React.CSSProperties = {
-  background: "transparent",
-  color: "white",
-  border: "1px solid #333",
-  padding: "8px 12px",
-  borderRadius: 10,
+  boxShadow: "0 24px 80px rgba(0,0,0,0.5)",
 };
