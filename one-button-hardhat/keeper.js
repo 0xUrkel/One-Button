@@ -195,5 +195,10 @@ console.log(`Keeper started for ${USE_MAINNET ? "mainnet" : "fuji"}`);
 console.log(`Contract: ${CONTRACT_ADDRESS}`);
 console.log(`Keeper wallet: ${account.address}`);
 
-await tick();
-process.exit(0);
+try {
+  await tick();
+  process.exit(0);
+} catch (error) {
+  console.error(error);
+  process.exit(1);
+}
