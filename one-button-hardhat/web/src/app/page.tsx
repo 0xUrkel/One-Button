@@ -1,7 +1,12 @@
 "use client";
 
 import { useEffect, useMemo, useRef, useState } from "react";
-import { useAccount, useReadContract, useWriteContract } from "wagmi";
+import {
+  useAccount,
+  useReadContract,
+  useWatchBlockNumber,
+  useWriteContract,
+} from "wagmi";
 
 import { CONTRACT_ADDRESS, EMPTY_ADDRESS } from "@/lib/constants";
 import { oneButtonGameAbi } from "@/lib/abi/oneButtonGameAbi";
@@ -9,7 +14,6 @@ import { formatAvax, formatSeconds, shortenAddress } from "@/lib/format";
 
 import ConnectWalletButton from "@/components/ConnectWalletButton";
 import InstructionsModal from "@/components/InstructionsModal";
-import StatusBadge from "@/components/StatusBadge";
 import RoundMaintenanceCard from "@/components/RoundMaintenanceCard";
 import LeaderboardModal, {
   type LeaderboardEntry,
@@ -31,53 +35,120 @@ export default function HomePage() {
   const previousLeaderRef = useRef<string | undefined>(undefined);
   const suppressNextSnipeRef = useRef(false);
 
-  const { data: ownerAddress } = useReadContract({
+  const { data: ownerAddress, refetch: refetchOwner } = useReadContract({
     address: CONTRACT_ADDRESS,
     abi: oneButtonGameAbi,
     functionName: "owner",
   });
 
-  const { data: currentRoundId } = useReadContract({
-    address: CONTRACT_ADDRESS,
-    abi: oneButtonGameAbi,
-    functionName: "currentRoundId",
-  });
+  const { data: currentRoundId, refetch: refetchCurrentRoundId } =
+    useReadContract({
+      address: CONTRACT_ADDRESS,
+      abi: oneButtonGameAbi,
+      functionName: "currentRoundId",
+    });
 
-  const { data: currentSeasonId } = useReadContract({
-    address: CONTRACT_ADDRESS,
-    abi: oneButtonGameAbi,
-    functionName: "currentSeasonId",
-  });
+  const { data: currentSeasonId, refetch: refetchCurrentSeasonId } =
+    useReadContract({
+      address: CONTRACT_ADDRESS,
+      abi: oneButtonGameAbi,
+      functionName: "currentSeasonId",
+    });
 
-  const { data: timeRemaining } = useReadContract({
-    address: CONTRACT_ADDRESS,
-    abi: oneButtonGameAbi,
-    functionName: "getTimeRemaining",
-    query: { refetchInterval: 5000 },
-  });
+  const { data: timeRemaining, refetch: refetchTimeRemaining } =
+    useReadContract({
+      address: CONTRACT_ADDRESS,
+      abi: oneButtonGameAbi,
+      functionName: "getTimeRemaining",
+    });
 
-  const { data: currentPhase } = useReadContract({
+  const { data: currentPhase, refetch: refetchCurrentPhase } = useReadContract({
     address: CONTRACT_ADDRESS,
     abi: oneButtonGameAbi,
     functionName: "getCurrentPhase",
-    query: { refetchInterval: 3000 },
   });
 
-  const { data: roundData } = useReadContract({
+  const { data: roundData, refetch: refetchRoundData } = useReadContract({
     address: CONTRACT_ADDRESS,
     abi: oneButtonGameAbi,
     functionName: "rounds",
     args: currentRoundId !== undefined ? [currentRoundId] : undefined,
-    query: { enabled: currentRoundId !== undefined, refetchInterval: 3000 },
+    query: { enabled: currentRoundId !== undefined },
   });
 
-  const { data: pressCost } = useReadContract({
+  const { data: pressCost, refetch: refetchPressCost } = useReadContract({
     address: CONTRACT_ADDRESS,
     abi: oneButtonGameAbi,
     functionName: "getCurrentPressCost",
     args: address ? [address] : undefined,
-    query: { enabled: !!address, refetchInterval: 3000 },
+    query: { enabled: !!address },
   });
+
+  const roundTuple = roundData as readonly unknown[] | undefined;
+
+  const leaderAddress = useMemo(() => {
+    const candidate = roundTuple?.[10];
+    return typeof candidate === "string" ? candidate : undefined;
+  }, [roundTuple]);
+
+  const { data: leaderLastPressAt, refetch: refetchLeaderLastPressAt } =
+    useReadContract({
+      address: CONTRACT_ADDRESS,
+      abi: oneButtonGameAbi,
+      functionName: "playerLastPressAt",
+      args:
+        currentRoundId !== undefined && leaderAddress
+          ? [currentRoundId, leaderAddress]
+          : undefined,
+      query: {
+        enabled: currentRoundId !== undefined && !!leaderAddress,
+      },
+    });
+
+  const lastCompletedRoundId = useMemo(() => {
+    if (currentRoundId === undefined || currentRoundId === 0n) return undefined;
+    return currentRoundId - 1n;
+  }, [currentRoundId]);
+
+  const { data: lastRoundData, refetch: refetchLastRoundData } =
+    useReadContract({
+      address: CONTRACT_ADDRESS,
+      abi: oneButtonGameAbi,
+      functionName: "rounds",
+      args:
+        lastCompletedRoundId !== undefined ? [lastCompletedRoundId] : undefined,
+      query: { enabled: lastCompletedRoundId !== undefined },
+    });
+
+  const lastRoundTuple = lastRoundData as readonly unknown[] | undefined;
+
+  const { data: lastRoundContribution, refetch: refetchLastRoundContribution } =
+    useReadContract({
+      address: CONTRACT_ADDRESS,
+      abi: oneButtonGameAbi,
+      functionName: "playerContribution",
+      args:
+        lastCompletedRoundId !== undefined && address
+          ? [lastCompletedRoundId, address]
+          : undefined,
+      query: {
+        enabled: lastCompletedRoundId !== undefined && !!address,
+      },
+    });
+
+  const { data: dividendAlreadyClaimed, refetch: refetchDividendClaimed } =
+    useReadContract({
+      address: CONTRACT_ADDRESS,
+      abi: oneButtonGameAbi,
+      functionName: "dividendClaimed",
+      args:
+        lastCompletedRoundId !== undefined && address
+          ? [lastCompletedRoundId, address]
+          : undefined,
+      query: {
+        enabled: lastCompletedRoundId !== undefined && !!address,
+      },
+    });
 
   useEffect(() => {
     if (timeRemaining === undefined) return;
@@ -92,80 +163,6 @@ export default function HomePage() {
 
     return () => window.clearInterval(tick);
   }, []);
-
-  const isOwner = useMemo(() => {
-    if (!address || !ownerAddress) return false;
-    return address.toLowerCase() === ownerAddress.toLowerCase();
-  }, [address, ownerAddress]);
-
-  const roundTuple = roundData as readonly unknown[] | undefined;
-
-  const leaderAddress = useMemo(() => {
-    const candidate = roundTuple?.[2];
-    return typeof candidate === "string" ? candidate : undefined;
-  }, [roundTuple]);
-
-  const timeLeftLabel = useMemo(() => {
-    return formatSeconds(displayTimeRemaining);
-  }, [displayTimeRemaining]);
-
-  const isDanger = useMemo(() => {
-    const secs = Number(displayTimeRemaining ?? 0n);
-    return secs <= 3600;
-  }, [displayTimeRemaining]);
-
-  const isCritical = useMemo(() => {
-    const secs = Number(displayTimeRemaining ?? 0n);
-    return secs <= 600;
-  }, [displayTimeRemaining]);
-
-  const isLeader = useMemo(() => {
-    if (!address || !leaderAddress) return false;
-    return address.toLowerCase() === leaderAddress.toLowerCase();
-  }, [address, leaderAddress]);
-
-  const helperText = useMemo(() => {
-    if (!isConnected) return "Connect wallet to jump in and take the lead.";
-    if (isLeader)
-      return "You’re in front. Defend the lead until the timer hits zero.";
-    if (isCritical) return "Sudden death. Every second matters now.";
-    if (isDanger) return "The window is tight. One press can swing the round.";
-    return "Press to take the lead before someone else does.";
-  }, [isConnected, isLeader, isCritical, isDanger]);
-
-  const ctaText = useMemo(() => {
-    if (!isConnected) return "Connect Wallet to Play";
-    if (isPending) return "Submitting...";
-    if (isLeader) return "Defend Your Lead";
-    return "Press the Button";
-  }, [isConnected, isLeader, isPending]);
-
-  const lastCompletedRoundId = useMemo(() => {
-    if (currentRoundId === undefined || currentRoundId === 0n) return undefined;
-    return currentRoundId - 1n;
-  }, [currentRoundId]);
-
-  const lastPressAgo = useMemo(() => {
-    const raw = roundTuple?.[3];
-    if (typeof raw !== "bigint" || raw === 0n) return "Unknown";
-
-    const diffSeconds = Math.max(
-      0,
-      Math.floor((nowMs - Number(raw) * 1000) / 1000),
-    );
-
-    if (diffSeconds < 5) return "just now";
-    if (diffSeconds < 60) return `${diffSeconds}s ago`;
-
-    const mins = Math.floor(diffSeconds / 60);
-    if (mins < 60) return `${mins}m ago`;
-
-    const hours = Math.floor(mins / 60);
-    if (hours < 24) return `${hours}h ago`;
-
-    const days = Math.floor(hours / 24);
-    return `${days}d ago`;
-  }, [roundTuple, nowMs]);
 
   async function loadLeaderboard() {
     setLeaderboardLoading(true);
@@ -189,6 +186,123 @@ export default function HomePage() {
   useEffect(() => {
     void loadLeaderboard();
   }, []);
+
+  useWatchBlockNumber({
+    onBlockNumber() {
+      setNowMs(Date.now());
+      void refetchOwner();
+      void refetchCurrentRoundId();
+      void refetchCurrentSeasonId();
+      void refetchTimeRemaining();
+      void refetchCurrentPhase();
+      void refetchRoundData();
+      void refetchLastRoundData();
+      void refetchLeaderLastPressAt();
+
+      if (address) {
+        void refetchPressCost();
+        void refetchLastRoundContribution();
+        void refetchDividendClaimed();
+      }
+
+      void loadLeaderboard();
+    },
+  });
+
+  const isOwner = useMemo(() => {
+    if (!address || !ownerAddress) return false;
+    return address.toLowerCase() === ownerAddress.toLowerCase();
+  }, [address, ownerAddress]);
+
+  const timeLeftLabel = useMemo(() => {
+    return formatSeconds(displayTimeRemaining);
+  }, [displayTimeRemaining]);
+
+  const isDanger = useMemo(() => {
+    const secs = Number(displayTimeRemaining ?? 0n);
+    return secs <= 60;
+  }, [displayTimeRemaining]);
+
+  const isCritical = useMemo(() => {
+    const secs = Number(displayTimeRemaining ?? 0n);
+    return secs <= 15;
+  }, [displayTimeRemaining]);
+
+  const isLeader = useMemo(() => {
+    if (!address || !leaderAddress) return false;
+    return address.toLowerCase() === leaderAddress.toLowerCase();
+  }, [address, leaderAddress]);
+
+  const helperText = useMemo(() => {
+    if (!isConnected) return "Connect wallet to jump in and take the lead.";
+    if (isLeader)
+      return "You’re in front. Defend the lead until the timer hits zero.";
+    if (isCritical) return "Sudden death. Every second matters now.";
+    if (isDanger) return "The window is tight. One press can swing the round.";
+    return "Press to take the lead before someone else does.";
+  }, [isConnected, isLeader, isCritical, isDanger]);
+
+  const ctaText = useMemo(() => {
+    if (!isConnected) return "Connect Wallet to Play";
+    if (isPending) return "Submitting...";
+    if (isLeader) return "Defend Your Lead";
+    return "Press the Button";
+  }, [isConnected, isLeader, isPending]);
+
+  const lastPressAgo = useMemo(() => {
+    const raw = leaderLastPressAt;
+
+    if (typeof raw !== "bigint" || raw === 0n) return "Unknown";
+
+    const diffSeconds = Math.max(
+      0,
+      Math.floor((nowMs - Number(raw) * 1000) / 1000),
+    );
+
+    if (diffSeconds < 5) return "just now";
+    if (diffSeconds < 60) return `${diffSeconds}s ago`;
+
+    const mins = Math.floor(diffSeconds / 60);
+    if (mins < 60) return `${mins}m ago`;
+
+    const hours = Math.floor(mins / 60);
+    if (hours < 24) return `${hours}h ago`;
+
+    const days = Math.floor(hours / 24);
+    return `${days}d ago`;
+  }, [leaderLastPressAt, nowMs]);
+
+  const lastRoundSettled = Boolean(lastRoundTuple?.[11]);
+  const lastRoundWinner =
+    typeof lastRoundTuple?.[10] === "string" ? lastRoundTuple[10] : undefined;
+  const lastRoundWinnerPayout =
+    typeof lastRoundTuple?.[5] === "bigint" ? lastRoundTuple[5] : 0n;
+  const lastRoundDividendPool =
+    typeof lastRoundTuple?.[6] === "bigint" ? lastRoundTuple[6] : 0n;
+  const lastRoundTotalPot =
+    typeof lastRoundTuple?.[4] === "bigint" ? lastRoundTuple[4] : 0n;
+
+  const claimableDividend = useMemo(() => {
+    if (!lastRoundSettled) return 0n;
+    if (!address) return 0n;
+    if (dividendAlreadyClaimed) return 0n;
+    if (
+      typeof lastRoundContribution !== "bigint" ||
+      lastRoundContribution === 0n
+    ) {
+      return 0n;
+    }
+    if (lastRoundTotalPot === 0n || lastRoundDividendPool === 0n) return 0n;
+
+    return (lastRoundDividendPool * lastRoundContribution) / lastRoundTotalPot;
+  }, [
+    address,
+    dividendAlreadyClaimed,
+    lastRoundContribution,
+    lastRoundDividendPool,
+    lastRoundSettled,
+    lastRoundTotalPot,
+  ]);
 
   useEffect(() => {
     if (!address || !leaderAddress) {
@@ -250,6 +364,16 @@ export default function HomePage() {
             // no-op
           }
 
+          void refetchCurrentRoundId();
+          void refetchCurrentSeasonId();
+          void refetchTimeRemaining();
+          void refetchCurrentPhase();
+          void refetchRoundData();
+          void refetchLastRoundData();
+          void refetchPressCost();
+          void refetchLeaderLastPressAt();
+          void refetchLastRoundContribution();
+          void refetchDividendClaimed();
           void loadLeaderboard();
         },
       },
@@ -257,13 +381,57 @@ export default function HomePage() {
   }
 
   function handleClaimDividend() {
-    writeContract({
-      address: CONTRACT_ADDRESS,
-      abi: oneButtonGameAbi,
-      functionName: "claimDividend",
-      args: [lastCompletedRoundId ?? 0n],
-    });
+    writeContract(
+      {
+        address: CONTRACT_ADDRESS,
+        abi: oneButtonGameAbi,
+        functionName: "claimDividend",
+        args: [lastCompletedRoundId ?? 0n],
+      },
+      {
+        onSuccess: () => {
+          void refetchLastRoundContribution();
+          void refetchDividendClaimed();
+          void refetchLastRoundData();
+        },
+      },
+    );
   }
+
+  const statCards = [
+    {
+      label: "Season",
+      value: String(currentSeasonId ?? "-"),
+      accent: false,
+    },
+    {
+      label: "Round",
+      value: String(currentRoundId ?? "-"),
+      accent: false,
+    },
+    {
+      label: "Pot",
+      value: `${formatAvax(roundTuple?.[4] as bigint | undefined)} AVAX`,
+      accent: true,
+    },
+    {
+      label: "Last Round Dividend Pool",
+      value: `${formatAvax(lastRoundDividendPool)} AVAX`,
+      accent: false,
+    },
+    {
+      label: "Your Contribution",
+      value: `${formatAvax(
+        typeof lastRoundContribution === "bigint" ? lastRoundContribution : 0n,
+      )} AVAX`,
+      accent: false,
+    },
+    {
+      label: "Claimable Dividend",
+      value: `${formatAvax(claimableDividend)} AVAX`,
+      accent: true,
+    },
+  ];
 
   return (
     <>
@@ -303,6 +471,31 @@ export default function HomePage() {
 
         {snipedToast ? <div className="sniped-toast">{snipedToast}</div> : null}
 
+        {lastRoundSettled &&
+        lastRoundWinner &&
+        lastRoundWinner !== EMPTY_ADDRESS ? (
+          <section className="winner-banner-card">
+            <div className="winner-banner-head">Previous Round Winner</div>
+            <div className="winner-banner-row">
+              <div className="winner-banner-left">
+                <div className="winner-banner-wallet">
+                  {shortenAddress(lastRoundWinner)}
+                </div>
+                <div className="winner-banner-sub">
+                  Round #{String(lastCompletedRoundId ?? "-")} settled
+                </div>
+              </div>
+
+              <div className="winner-banner-right">
+                <div className="winner-banner-won-label">Won</div>
+                <div className="winner-banner-amount">
+                  {formatAvax(lastRoundWinnerPayout)} AVAX
+                </div>
+              </div>
+            </div>
+          </section>
+        ) : null}
+
         {isLeader ? (
           <div className="leading-banner">🔥 You’re leading.</div>
         ) : null}
@@ -320,27 +513,16 @@ export default function HomePage() {
           </div>
         </section>
 
-        <section className="stats-strip">
-          <div className="stats-strip-item">
-            <span className="stats-strip-label">Season</span>
-            <strong className="stats-strip-value">
-              {String(currentSeasonId ?? "-")}
-            </strong>
-          </div>
-
-          <div className="stats-strip-item">
-            <span className="stats-strip-label">Round</span>
-            <strong className="stats-strip-value">
-              {String(currentRoundId ?? "-")}
-            </strong>
-          </div>
-
-          <div className="stats-strip-item stats-strip-item-pot">
-            <span className="stats-strip-label">Pot</span>
-            <strong className="stats-strip-value">
-              {formatAvax(roundTuple?.[4] as bigint | undefined)} AVAX
-            </strong>
-          </div>
+        <section className="stats-grid stats-grid-compact">
+          {statCards.map((card) => (
+            <div
+              key={card.label}
+              className={`stats-grid-card ${card.accent ? "is-accent" : ""}`}
+            >
+              <span className="stats-grid-label">{card.label}</span>
+              <strong className="stats-grid-value">{card.value}</strong>
+            </div>
+          ))}
         </section>
 
         <section className="sketch-action-card action-card-compact action-card-centered">
@@ -396,12 +578,20 @@ export default function HomePage() {
 
             <button
               disabled={
-                !isConnected || lastCompletedRoundId === undefined || isPending
+                !isConnected ||
+                lastCompletedRoundId === undefined ||
+                isPending ||
+                claimableDividend === 0n ||
+                !!dividendAlreadyClaimed
               }
               onClick={handleClaimDividend}
               className="ghost-button secondary-ghost-button"
             >
-              Claim Dividend
+              {dividendAlreadyClaimed
+                ? "✅ Dividend Claimed"
+                : claimableDividend > 0n
+                ? `Claim ${formatAvax(claimableDividend)} AVAX`
+                : "No Dividend"}
             </button>
           </div>
 
@@ -416,6 +606,7 @@ export default function HomePage() {
           </section>
         ) : null}
       </main>
+
       <a
         href="https://x.com/0xUrkel"
         target="_blank"

@@ -43,6 +43,36 @@ export const oneButtonGameAbi = [
   },
   {
     type: "function",
+    name: "playerLastPressAt",
+    stateMutability: "view",
+    inputs: [
+      { name: "", type: "uint256" },
+      { name: "", type: "address" },
+    ],
+    outputs: [{ type: "uint64" }],
+  },
+  {
+    type: "function",
+    name: "playerContribution",
+    stateMutability: "view",
+    inputs: [
+      { name: "", type: "uint256" },
+      { name: "", type: "address" },
+    ],
+    outputs: [{ type: "uint256" }],
+  },
+  {
+    type: "function",
+    name: "dividendClaimed",
+    stateMutability: "view",
+    inputs: [
+      { name: "", type: "uint256" },
+      { name: "", type: "address" },
+    ],
+    outputs: [{ type: "bool" }],
+  },
+  {
+    type: "function",
     name: "rounds",
     stateMutability: "view",
     inputs: [{ type: "uint256" }],
