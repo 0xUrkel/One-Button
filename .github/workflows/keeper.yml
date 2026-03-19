@@ -1,20 +1,31 @@
-name: Debug env presence
-  run: |
-    echo "NETWORK=$NETWORK"
-    if [ -n "$CONTRACT_ADDRESS" ]; then echo "CONTRACT_ADDRESS is set"; else echo "CONTRACT_ADDRESS is MISSING"; fi
-    if [ -n "$PRIVATE_KEY" ]; then echo "PRIVATE_KEY is set"; else echo "PRIVATE_KEY is MISSING"; fi
-    if [ -n "$MAINNET_RPC_URL" ]; then echo "MAINNET_RPC_URL is set"; else echo "MAINNET_RPC_URL is MISSING"; fi
-  env:
-    CONTRACT_ADDRESS: ${{ secrets.CONTRACT_ADDRESS }}
-    PRIVATE_KEY: ${{ secrets.PRIVATE_KEY }}
-    NETWORK: mainnet
-    MAINNET_RPC_URL: ${{ secrets.MAINNET_RPC_URL }}
-    
- name: Run keeper
-  run: node --trace-uncaught keeper.js
-  env:
-    CONTRACT_ADDRESS: ${{ secrets.CONTRACT_ADDRESS }}
-    PRIVATE_KEY: ${{ secrets.PRIVATE_KEY }}
-    NETWORK: mainnet
-    MAINNET_RPC_URL: ${{ secrets.MAINNET_RPC_URL }}
-    FUJI_RPC_URL: ${{ secrets.FUJI_RPC_URL }}
+name: Keeper
+
+on:
+  schedule:
+    - cron: "*/1 * * * *"
+  workflow_dispatch:
+
+jobs:
+  run-keeper:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v5
+
+      - name: Setup Node
+        uses: actions/setup-node@v6
+        with:
+          node-version: 24
+
+      - name: Install deps
+        run: npm install
+
+      - name: Run keeper
+        run: node keeper-gh.js
+        env:
+          CONTRACT_ADDRESS: ${{ secrets.CONTRACT_ADDRESS }}
+          PRIVATE_KEY: ${{ secrets.PRIVATE_KEY }}
+          NETWORK: ${{ secrets.NETWORK }}
+          MAINNET_RPC_URL: ${{ secrets.MAINNET_RPC_URL }}
+          FUJI_RPC_URL: ${{ secrets.FUJI_RPC_URL }}
