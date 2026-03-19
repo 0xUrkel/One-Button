@@ -1,0 +1,30 @@
+name: Keeper
+
+on:
+  schedule:
+    - cron: "*/1 * * * *" # runs every 1 minute
+  workflow_dispatch:
+
+jobs:
+  run-keeper:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v3
+
+      - name: Setup Node
+        uses: actions/setup-node@v3
+        with:
+          node-version: 20
+
+      - name: Install deps
+        run: npm install
+
+      - name: Run keeper
+        run: node keeper.js
+        env:
+          CONTRACT_ADDRESS: ${{ secrets.CONTRACT_ADDRESS }}
+          PRIVATE_KEY: ${{ secrets.PRIVATE_KEY }}
+          NETWORK: mainnet
+          MAINNET_RPC_URL: ${{ secrets.MAINNET_RPC_URL }}
