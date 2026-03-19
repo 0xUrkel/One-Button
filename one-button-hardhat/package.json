@@ -9,7 +9,7 @@
     "node": "hardhat node",
     "deploy:local": "hardhat ignition deploy ./ignition/modules/OneButtonGame.ts --network localhost",
     "deploy:fuji": "hardhat ignition deploy ./ignition/modules/OneButtonGame.ts --network fuji",
-    "deploy:mainnet": "hardhat ignition deploy ./ignition/modules/OneButtonGame.ts --network avalanche"
+    "deploy:mainnet": "hardhat ignition deploy ./ignition/modules/OneButtonGame.ts --network mainnet"
   },
   "devDependencies": {
     "@nomicfoundation/hardhat-toolbox-mocha-ethers": "^3.0.0",
