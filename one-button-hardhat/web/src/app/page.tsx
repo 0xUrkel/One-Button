@@ -98,7 +98,7 @@ export default function HomePage() {
       functionName: "playerLastPressAt",
       args:
         currentRoundId !== undefined && leaderAddress
-          ? [currentRoundId, leaderAddress]
+          ? [currentRoundId, leaderAddress as `0x${string}`]
           : undefined,
       query: {
         enabled: currentRoundId !== undefined && !!leaderAddress,
