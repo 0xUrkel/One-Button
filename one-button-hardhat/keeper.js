@@ -196,4 +196,4 @@ console.log(`Contract: ${CONTRACT_ADDRESS}`);
 console.log(`Keeper wallet: ${account.address}`);
 
 await tick();
-setInterval(tick, POLL_INTERVAL_MS);
+process.exit(0);
