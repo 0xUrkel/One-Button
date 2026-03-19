@@ -8,6 +8,9 @@ on:
 jobs:
   run-keeper:
     runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: ./one-button-hardhat/one-button-hardhat
 
     steps:
       - name: Checkout
