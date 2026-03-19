@@ -22,10 +22,10 @@ jobs:
         run: npm install
 
       - name: Run keeper
-        run: node keeper.js
+        run: node keeper-gh.js
         env:
           CONTRACT_ADDRESS: ${{ secrets.CONTRACT_ADDRESS }}
           PRIVATE_KEY: ${{ secrets.PRIVATE_KEY }}
-          NETWORK: mainnet
+          NETWORK: ${{ secrets.NETWORK }}
           MAINNET_RPC_URL: ${{ secrets.MAINNET_RPC_URL }}
           FUJI_RPC_URL: ${{ secrets.FUJI_RPC_URL }}
